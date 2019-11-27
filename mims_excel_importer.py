@@ -109,18 +109,18 @@ class MIMSExcelImporter:
                 traceback.print_exc(file=sys.stdout)
             
 
+if __name__ == "__main__":
+    importer = MIMSExcelImporter()
+    imported_records = importer.read_excel_to_json(mims_sheet_file, "Geographic metadata")
 
-importer = MIMSExcelImporter()
-imported_records = importer.read_excel_to_json(mims_sheet_file, "Geographic metadata")
-
-"""
-for record in imported_records:
-    print("--")
-    for auth in record['Cited Authors']:
-        #print(auth)
-        for k in auth.keys():
-            print("%r : %r" %(k, auth[k]))
-        
-    print(record['Bounding Box'])
-    #print("\n")
-"""
+    """
+    for record in imported_records:
+        print("--")
+        for auth in record['Cited Authors']:
+            #print(auth)
+            for k in auth.keys():
+                print("%r : %r" %(k, auth[k]))
+            
+        print(record['Bounding Box'])
+        #print("\n")
+    """
