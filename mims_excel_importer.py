@@ -41,7 +41,7 @@ class MIMSExcelImporter:
                     self.parse_raw_record(raw_record)
                     raw_records.append(raw_record)
                 except RecordParseError as e:
-                    print("{}    Record id: {}".format(e, raw_record['fileIdentifier']))                    
+                    print("{}    Record id: {}".format(e, raw_record['fileIdentifier']))
         except Exception as e:
             print("Error while reading excel speadsheet. {}".format(e))
             traceback.print_exc(file=sys.stdout)
@@ -56,11 +56,19 @@ class MIMSExcelImporter:
         self.parse_responsible_parties(record, 'responsibleParties.1',True)
         self.parse_responsible_parties(record, 'responsibleParties.2',True)
 
-        # descriptiveKeywords, keyword, topicCategories
-        #self.parse_column_list(record, 'Keywords (free text)')
-        #self.parse_column_list(record, 'Category')
-        #self.parse_column_list(record, 'Format')
-        #self.parse_bounding_box(record)
+        self.parse_column_list(record, 'keyword')
+        self.parse_column_list(record, 'topicCategories')
+        self.parse_field_to_dict(record,'relatedIdentifiers',
+                                       ['relatedIdentifier', 'relatedIdentifierType', 'relationType'])
+        self.parse_field_to_dict(record,'onlineResources',
+                                       ['name', 'description', 'linkage'])
+        self.parse_field_to_dict(record,'referenceSystemName',
+                                       ['codeSpace', 'version'])
+        self.parse_field_to_dict(record,'descriptiveKeywords',
+                                       ['keywordType', 'keyword'])
+        self.parse_field_to_dict(record,'boundingBox',
+                                       ['northBoundLatitude', 'southBoundLatitude',
+                                       'eastBoundLongitude', 'westBoundLongitude'])
 
     def parse_responsible_parties(self, record, field, append_mode=False):
         valid_keys = ['individualName','organizationName','positionName','contactInfo','role','email']
@@ -134,21 +142,43 @@ class MIMSExcelImporter:
                         raise Exception()
                 record['Bounding Box'] = parsed_box
             except:
-                raise RecordParseError("Invalid bounding box: {}".format(box_str))
                 traceback.print_exc(file=sys.stdout)
-            
+                raise RecordParseError("Invalid bounding box: {}".format(box_str))
+
+    def parse_field_to_dict(self, record, field_name, valid_fields):
+        related_ids_str = record[field_name]
+        if str(related_ids_str) == "nan":
+            return
+        related_ids = {}
+        #print(related_ids_str)
+        for item in related_ids_str.split("|"):
+            parts = item.split(":")
+            k = parts[0]
+            v = ":".join(parts[1:len(parts)])
+
+            k = k.replace(" ","")
+            if len(k) == 0:
+                continue
+            if k not in valid_fields:
+                #print(item)
+                raise RecordParseError("Invalid %s field: %r" % (field_name,item))
+            related_ids[k] = v
+        record[field_name] = related_ids
+
 
 if __name__ == "__main__":
     importer = MIMSExcelImporter()
     imported_records = importer.read_excel_to_json(mims_sheet_file, "CKAN_Geographic")
 
 
-    for record in imported_records:
-        print("--")
-        for auth in record['responsibleParties']:
-            #print(auth)
-            for k in auth.keys():
-                print("%r : %r" %(k, auth[k]))
+    #print(len(imported_records))
+
+    #for record in imported_records:
+    #    print("*")
+        #for auth in record['responsibleParties']:
+        #    #print(auth)
+        #    for k in auth.keys():
+        #        print("%r : %r" %(k, auth[k]))
             
         #print(record['Bounding Box'])
         #print("\n")
