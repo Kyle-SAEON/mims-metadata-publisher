@@ -1,6 +1,8 @@
+from datetime import datetime
 import pandas
 import sys
 import traceback
+import mims_schema_generator
 
 mims_sheet_file='./MIMS.Metadata.Master.Sheet.xlsx'
 
@@ -68,7 +70,7 @@ class MIMSExcelImporter:
                                        ['keywordType', 'keyword'])
         self.parse_field_to_dict(record,'boundingBox',
                                        ['northBoundLatitude', 'southBoundLatitude',
-                                       'eastBoundLongitude', 'westBoundLongitude'])
+                                       'eastBoundLongitude', 'westBoundLongitude'],True)
 
     def parse_responsible_parties(self, record, field, append_mode=False):
         valid_keys = ['individualName','organizationName','positionName','contactInfo','role','email']
@@ -77,7 +79,8 @@ class MIMSExcelImporter:
             raw_str = record[field]
             for detail_str in raw_str.split("\n"):
                 if len(detail_str.replace(" ","")) > 0:
-                    detail = {}
+                    detail = {'individualName':'','organizationName':'','positionName':'',
+                              'contactInfo':'','role':'','email':''}
                     for item in detail_str.split("|"):
                         if 'email' in item and 'contactInfo' in item:
                             #print(item)
@@ -119,6 +122,8 @@ class MIMSExcelImporter:
         if ',' in record[column]:
             keywords = record[column].split(',')
             record[column] = keywords
+        else:
+            record[column] = [record[column]]
 
     def parse_bounding_box(self, record):
         parsed_box = {'North':'','South':'','East':'','West':''}
@@ -145,9 +150,10 @@ class MIMSExcelImporter:
                 traceback.print_exc(file=sys.stdout)
                 raise RecordParseError("Invalid bounding box: {}".format(box_str))
 
-    def parse_field_to_dict(self, record, field_name, valid_fields):
+    def parse_field_to_dict(self, record, field_name, valid_fields,all_fields=False):
         related_ids_str = record[field_name]
         if str(related_ids_str) == "nan":
+            record[field_name] = None
             return
         related_ids = {}
         #print(related_ids_str)
@@ -165,11 +171,91 @@ class MIMSExcelImporter:
             related_ids[k] = v
         record[field_name] = related_ids
 
+        if all_fields:
+            for field in valid_fields:
+                if field not in record[field_name]:
+                    raise RecordParseError("Invalid %r format: %r" % (field_name,str(record[field_name])))
+
 
 if __name__ == "__main__":
     importer = MIMSExcelImporter()
     imported_records = importer.read_excel_to_json(mims_sheet_file, "CKAN_Geographic")
+    schema_generator = mims_schema_generator.MIMSSchemaGenerator()
 
+    for record in imported_records:
+        schema_generator.set_title(record['title'])
+        if type(record['date']) == str:
+            date = datetime.strptime(record['date'],"%Y-%m-%d")
+            schema_generator.set_date(date)
+        elif type(record['date']) == int:
+            date = datetime.strptime(str(record['date']),"%Y")
+            schema_generator.set_date(date)
+        elif type(record['date']) == datetime:
+            date = record['date']
+            schema_generator.set_date(date)
+        
+
+        for rparty in record['responsibleParties']:
+            if len(rparty['email']) > 0:
+                contactInfo = rparty['contactInfo'] + "," + rparty['email']
+            schema_generator.add_responsible_party(rparty['individualName'], rparty['organizationName'], 
+                                                   rparty['contactInfo'], rparty['role'],
+                                                   rparty['positionName'])#, online_resource)
+
+        schema_generator.set_geographic_identifier(record['geographicIdentifier'])
+        #print((record['boundingBox']))
+        schema_generator.set_bounding_box_extent(record['boundingBox']['westBoundLongitude'], record['boundingBox']['eastBoundLongitude'], 
+                                                 record['boundingBox']['southBoundLatitude'], record['boundingBox']['northBoundLatitude'])
+
+        if (type(record['startTime']) == datetime) and (type(record['endTime']) == datetime):
+            schema_generator.set_temporal_extent(record['startTime'], record['endTime'])
+        elif (type(record['startTime']) == int) and (type(record['endTime']) == int):
+            start_date = datetime.strptime(str(record['startTime']),"%Y")
+            end_date = datetime.strptime(str(record['endTime']),"%Y")
+            schema_generator.set_temporal_extent(start_date, end_date)
+        else:
+            print("Invalid start/end-times {} {}".format(record['startTime'], record['endTime']))
+
+
+        schema_generator.set_languages(record['languages'])
+        schema_generator.set_characterset('utf8')
+
+        schema_generator.set_topic_categories(record['topicCategories'])
+        schema_generator.set_spatial_resolution(record['spatialResolution'])
+        schema_generator.set_abstract(record['abstract'])
+
+        schema_generator.add_distribution_format(record['formatName'])
+        schema_generator.set_spatial_representation_type([record['spatialRepresentationType']])
+        schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'],
+                                                   record['referenceSystemName']['version'])
+        schema_generator.set_lineage_statement(record['lineageStatement'])
+        schema_generator.add_online_resources(record['onlineResources']['name'],
+                                              record['onlineResources']['description'],
+                                              record['onlineResources']['linkage'])  #name, description, link)
+
+        schema_generator.set_file_identifier(record['fileIdentifier'])
+
+        schema_generator.set_metadata_standard_name(record['metadataStandardName'])
+        schema_generator.set_metadata_standard_version(record['metadataStandardVersion'])
+        schema_generator.set_metadata_language("en")
+        schema_generator.set_metadata_characterset('utf8')
+        #date = datetime.strptime(record['metadataTimestamp'],"%Y-%m-%d")
+        if (str(record['metadataTimestamp'])) != "NaT":
+            schema_generator.set_metadata_time_stamp(record['metadataTimestamp'].to_pydatetime())
+        #schema_generator.set_purpose()
+        schema_generator.set_scope(record['scope'])
+        #schema_generator.set_status()
+        schema_generator.add_descritive_key_words(record['descriptiveKeywords']['keywordType'],
+                                                  record['descriptiveKeywords']['keyword'])
+
+        schema_generator.set_constraints(record['rights'], record['rightsURI'], record['accessConstraints'])
+        if record['relatedIdentifiers']:
+            schema_generator.set_related_identifiers(record['relatedIdentifiers']['relatedIdentifier'], 
+                                                    record['relatedIdentifiers']['relatedIdentifierType'],
+                                                    record['relatedIdentifiers']['relationType'])
+
+
+    #print(schema_generator.get_filled_schema())
 
     #print(len(imported_records))
 
