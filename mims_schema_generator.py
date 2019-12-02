@@ -17,6 +17,7 @@ class MIMSSchemaGenerator:
         }
         self.record["distributionFormats"] = []
         self.record["descriptiveKeywords"] = []
+        self.record["onlineResources"] = []
 
     def set_title(self, title):
         self.record["title"] = title
@@ -25,10 +26,10 @@ class MIMSSchemaGenerator:
     def set_date(self, date):
         if type(date) != datetime:
             raise MIMSSchemaFormatError("Invalid date type, must be datetime")
-        responsible_parties = "{}-{}-{}".format(a.year, a.month, a.day)
+        self.record["date"] = "{}-{}-{}".format(date.year, date.month, date.day)
         #"date": "2019-11-02",
 
-    def add_responsible_party(self, name, organization, contact_info, role='', position_name='', online_resource=None):
+    def add_responsible_party(self, name='', organization='', contact_info='', role='', position_name='', online_resource=None):
         responsible_party = {
             "individualName": name,
             "organizationName": organization,
@@ -79,7 +80,7 @@ class MIMSSchemaGenerator:
         }
         self.record["extent"]["verticalElement"] = vertical_extent
 
-    def set_temporal_extent(start_time, end_time):
+    def set_temporal_extent(self, start_time, end_time):
         if type(start_time) != datetime or type(end_time) != datetime:
                 raise MIMSSchemaFormatError("Invalid start/end time type, must be a datetime")
         format="%Y-%m-%dT%H:%M:%S"
@@ -121,6 +122,7 @@ class MIMSSchemaGenerator:
 
     def set_reference_system_name(self, codespace, version):
         self.record["referenceSystemName"] = {"codeSpace": codespace, "version": version},
+    
     def set_lineage_statement(self, lineage):
         self.record["lineageStatement"] = lineage
 
@@ -143,13 +145,13 @@ class MIMSSchemaGenerator:
         self.record["metadataLanguage"] = language
 
     def set_metadata_characterset(self, characterset):
-        self.record["metadataCharacterSet"].append(characterset)
+        self.record["metadataCharacterSet"] = characterset
 
-    def set_metadata_time_stamp(self, timestamp_str):
-        if type(timestamp) != datetime:
+    def set_metadata_time_stamp(self, timetamp):
+        if type(timetamp) != datetime:
              raise MIMSSchemaFormatError("Invalid metadata timestamp, must be datetime")
         format="%Y-%m-%dT%H:%M:%S"
-        timestamp_str = timestamp_str.strftime(format)
+        timestamp_str = timetamp.strftime(format)
         self.record["metadataTimestamp"] = timestamp_str
 
     def set_purpose(self, purpose):
@@ -169,8 +171,8 @@ class MIMSSchemaGenerator:
             "keyword":keyword
         })
 
-    def set_constraints(self, rights, rights_uri, use_limitations, access_constraints, use_constraints, classification):
-        if type(use_constraints) != list:
+    def set_constraints(self, rights, rights_uri, access_constraints, use_constraints='', classification='',  use_limitations=''):
+        if use_constraints != '' and type(use_constraints) != list:
             raise MIMSSchemaFormatError("Invalid use_constraints type, must be a list")
         self.record["constraints"] =  [{
             "rights": rights,
@@ -187,8 +189,11 @@ class MIMSSchemaGenerator:
             "relationType": relation_type
         }]
 
+    def get_filled_schema(self):
+        return self.record
+
 if __name__ == "__main__":
     mims_sheet_file='./MIMS.Metadata.Master.Sheet.xlsx'
     importer = mims_excel_importer.MIMSExcelImporter()
-    imported_records = importer.read_excel_to_json(mims_sheet_file, "Geographic metadata")
+    imported_records = importer.read_excel_to_json(mims_sheet_file, "CKAN_Geographic")
     schema_generator = MIMSSchemaGenerator()
