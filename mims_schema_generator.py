@@ -33,16 +33,15 @@ class MIMSSchemaGenerator:
         responsible_party = {
             "individualName": name,
             "organizationName": organization,
-            "contactInfo": contact_info
+            "contactInfo": contact_info,
+            'positionName':position_name,
+            'role':role,
         }
-        if len(role) > 0:
-            responsible_party['role'] = role
+
         if online_resource:
             link = {"linkage":online_resource}
             responsible_party['onlineResource'] = link
 
-        if len(position_name) > 0:
-            responsible_party["positionName"] = position_name
         self.record["responsibleParties"].append(responsible_party)
 
     def set_geographic_identifier(self, identifier):

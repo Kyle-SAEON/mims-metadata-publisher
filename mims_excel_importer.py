@@ -185,6 +185,7 @@ class MIMSExcelImporter:
                     raise RecordParseError("Invalid %r format: %r" % (field_name,str(record[field_name])))
 
 
+
 if __name__ == "__main__":
     importer = MIMSExcelImporter()
     imported_records = importer.read_excel_to_json(mims_sheet_file, "CKAN_Geographic")
@@ -208,6 +209,10 @@ if __name__ == "__main__":
 
         for rparty in record['responsibleParties']:
             contactInfo = "%r" % rparty['contactInfo']
+            if contactInfo == "''":
+                contactInfo = ''
+                #print("Invalid contact info {} {}".format(rparty, record['fileIdentifier']))
+                #continue
             if len(rparty['email']) > 0:
                 contactInfo = contactInfo + "," + rparty['email']
             schema_generator.add_responsible_party("%r" % rparty['individualName'], rparty['organizationName'], 
@@ -239,7 +244,7 @@ if __name__ == "__main__":
         if str(spatial_resolution) == 'nan':
             spatial_resolution = ''
         schema_generator.set_spatial_resolution(spatial_resolution)
-        schema_generator.set_abstract(record['abstract'])
+        schema_generator.set_abstract("%r" % record['abstract'])
 
         schema_generator.add_distribution_format(record['formatName'])
 
@@ -250,7 +255,7 @@ if __name__ == "__main__":
         
         schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'].replace(' ',''),
                                                    record['referenceSystemName']['version'].replace(' ',''))
-        schema_generator.set_lineage_statement(record['lineageStatement'])
+        schema_generator.set_lineage_statement("%r" % record['lineageStatement'])
         schema_generator.add_online_resources(record['onlineResources']['name'],
                                               record['onlineResources']['description'].replace(' ',''),
                                               record['onlineResources']['linkage'].replace(' ',''))  #name, description, link)
@@ -264,6 +269,9 @@ if __name__ == "__main__":
         #date = datetime.strptime(record['metadataTimestamp'],"%Y-%m-%d")
         if (str(record['metadataTimestamp'])) != "NaT":
             schema_generator.set_metadata_time_stamp(record['metadataTimestamp'].to_pydatetime())
+        else:
+            print("Invalid metadata timestamp {} - Record id {}".format(record['metadataTimestamp'], 
+                  record['fileIdentifier']))
         schema_generator.set_purpose('')
         schema_generator.set_scope(record['scope'])
         schema_generator.set_status(['completed'])
@@ -274,10 +282,18 @@ if __name__ == "__main__":
         if str(rights_uri) == 'nan':
             rights_uri = ''
         schema_generator.set_constraints(record['rights'], rights_uri, record['accessConstraints'])
+
+
         if record['relatedIdentifiers']:
-            schema_generator.set_related_identifiers(record['relatedIdentifiers']['relatedIdentifier'], 
-                                                    record['relatedIdentifiers']['relatedIdentifierType'],
-                                                    record['relatedIdentifiers']['relationType'])
+            def remove_ri_errors(input):
+                input = input.replace(' ','').replace(';','').replace('\n','')
+                return input
+            identifier = remove_ri_errors(record['relatedIdentifiers']['relatedIdentifier'])
+            id_type = remove_ri_errors(record['relatedIdentifiers']['relatedIdentifierType'])
+            relation_type = remove_ri_errors(record['relatedIdentifiers']['relationType'])
+            schema_generator.set_related_identifiers(identifier, 
+                                                    id_type,
+                                                    relation_type)
 
 
         converted_records.append(schema_generator.get_filled_schema())
@@ -297,9 +313,11 @@ if __name__ == "__main__":
                 'mims-metadata',
                 ['mims'],
                 'sans-1878-1')
-            break
-        except:
-            pass
+            
+        except Exception as e:
+            print(e)
+            #break
+            #pass
 
     print(len(converted_records))
     #print(len(imported_records))
