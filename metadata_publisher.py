@@ -67,6 +67,21 @@ def add_a_record_to_ckan(metadat_record, institution, collection, infrastructure
         logging.info(msg)
 
     record_id = result['id']
+
+    accepted_errors = [u'spatialRepresentationTypes', u'purpose', u'spatialResolution',
+                       u'metadataTimestamp', u'responsibleParties', u'constraints']
+                       # u'lineageStatement',u'extent',u'topicCategories',u'abstract'u'relatedIdentifiers'
+    errors = result['errors'].keys()
+    bad_errors =[]
+    for err in errors:
+        if err not in accepted_errors:
+            bad_errors.append(err)
+    if len(bad_errors) > 0:
+        #print("Bad errors {}".format(result['errors']['responsibleParties']))
+        print(bad_errors)
+        print(result)
+        raise Exception
+
     """
     if result['validated'] and (len(result['errors'].keys()) == 0):#result['validate_status'] == 'success':
         msg = "Validated successfully, advancing state"
