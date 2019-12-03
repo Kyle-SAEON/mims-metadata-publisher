@@ -42,7 +42,7 @@ class MIMSSchemaGenerator:
             responsible_party['onlineResource'] = link
 
         if len(position_name) > 0:
-            self.record["positionName"] = position_name
+            responsible_party["positionName"] = position_name
         self.record["responsibleParties"].append(responsible_party)
 
     def set_geographic_identifier(self, identifier):
@@ -84,8 +84,8 @@ class MIMSSchemaGenerator:
         if type(start_time) != datetime or type(end_time) != datetime:
                 raise MIMSSchemaFormatError("Invalid start/end time type, must be a datetime")
         format="%Y-%m-%dT%H:%M:%S"
-        start_time_str = start_time.strftime(format)
-        end_time_str = end_time.strftime(format)
+        start_time_str = start_time.strftime(format) + "+02:00"
+        end_time_str = end_time.strftime(format) + "+02:00"
         temporal_extent = {
             "startTime": start_time_str,
             "endTime": end_time_str
@@ -121,7 +121,7 @@ class MIMSSchemaGenerator:
         self.record["spatialRepresentationTypes"] = represenation
 
     def set_reference_system_name(self, codespace, version):
-        self.record["referenceSystemName"] = {"codeSpace": codespace, "version": version},
+        self.record["referenceSystemName"] = {"codeSpace": codespace, "version": version}
     
     def set_lineage_statement(self, lineage):
         self.record["lineageStatement"] = lineage
@@ -130,9 +130,11 @@ class MIMSSchemaGenerator:
        self.record["onlineResources"].append({
            "name":name,
            "description":description,
-           "link":link})
+           "linkage":link})
 
     def set_file_identifier(self, file_identifier):
+        if type(file_identifier) != str:
+             raise MIMSSchemaFormatError("Invalid file_identifier, must be a string")
         self.record["fileIdentifier"] = file_identifier
 
     def set_metadata_standard_name(self, metadata_standard):
@@ -147,11 +149,12 @@ class MIMSSchemaGenerator:
     def set_metadata_characterset(self, characterset):
         self.record["metadataCharacterSet"] = characterset
 
-    def set_metadata_time_stamp(self, timetamp):
-        if type(timetamp) != datetime:
+    def set_metadata_time_stamp(self, timestamp):
+        if type(timestamp) != datetime:
              raise MIMSSchemaFormatError("Invalid metadata timestamp, must be datetime")
         format="%Y-%m-%dT%H:%M:%S"
-        timestamp_str = timetamp.strftime(format)
+        #format="%Y-%m-%d %H:%M:%S"
+        timestamp_str = timestamp.strftime(format) + "+02:00"
         self.record["metadataTimestamp"] = timestamp_str
 
     def set_purpose(self, purpose):
