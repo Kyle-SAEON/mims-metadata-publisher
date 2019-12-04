@@ -68,8 +68,8 @@ def add_a_record_to_ckan(metadat_record, institution, collection, infrastructure
 
     record_id = result['id']
 
-    accepted_errors = [u'spatialRepresentationTypes', u'purpose', u'spatialResolution',
-                       u'metadataTimestamp', u'responsibleParties', u'constraints']
+    accepted_errors = []#[u'spatialRepresentationTypes', u'purpose', u'spatialResolution',
+                      # u'metadataTimestamp', u'responsibleParties', u'constraints']
                        # u'lineageStatement',u'extent',u'topicCategories',u'abstract'u'relatedIdentifiers'
     errors = result['errors'].keys()
     bad_errors =[]
@@ -79,8 +79,16 @@ def add_a_record_to_ckan(metadat_record, institution, collection, infrastructure
     if len(bad_errors) > 0:
         #print("Bad errors {}".format(result['errors']['responsibleParties']))
         print(bad_errors)
-        print(result)
+        print(result['errors'])
+        for error in bad_errors:
+            print(result['metadata'][error])
         raise Exception
+
+    record_id = result['id']
+    updated = set_workflow_state('mims-published', record_id)
+    UPDATE_METRICS['validated_successfully'] = UPDATE_METRICS['validated_successfully'] + 1
+    if updated:
+        UPDATE_METRICS['published'] = UPDATE_METRICS['published'] + 1
 
     """
     if result['validated'] and (len(result['errors'].keys()) == 0):#result['validate_status'] == 'success':
@@ -146,9 +154,9 @@ def check_ckan_added(institution, result):
         found = True
     return found
 
-def set_workflow_state(state, record_id, organization, val_result):
+def set_workflow_state(state, record_id):
     data = {
-        'state': state
+        'workflow_state': state
     }
 
     url = "{}/metadata/workflow/{}".format(
@@ -156,6 +164,7 @@ def set_workflow_state(state, record_id, organization, val_result):
     response = requests.post(
         url=url,
         params=data,
+        headers={'Authorization': 'Bearer ' + odp_ckan_api_key}
     )
 
     result = None
