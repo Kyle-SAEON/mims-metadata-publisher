@@ -209,14 +209,21 @@ if __name__ == "__main__":
 
         for rparty in record['responsibleParties']:
             contactInfo = "%r" % rparty['contactInfo']
+            #contactInfo = rparty['contactInfo']
             if contactInfo == "''":
                 contactInfo = ''
                 #print("Invalid contact info {} {}".format(rparty, record['fileIdentifier']))
                 #continue
             if len(rparty['email']) > 0:
                 contactInfo = contactInfo + "," + rparty['email']
+
+            role_fixes = {'':'','resourceprovider':'resourceProvider', 'custodian':'custodian', 'owner':'owner', 
+                          'user':'user', 'distributor':'distributor', 'originator':'originator', 
+                          'pointofcontact':'pointOfContact', 'principleinvestigator':'principalInvestigator', 
+                          'principalinvestigator':'principalInvestigator','processor':'processor', 'publisher':'publisher'}
+        
             schema_generator.add_responsible_party("%r" % rparty['individualName'], rparty['organizationName'], 
-                                                   contactInfo, rparty['role'],
+                                                   contactInfo, role_fixes[rparty['role'].lower()],
                                                    rparty['positionName'])#, online_resource)
 
         schema_generator.set_geographic_identifier(record['geographicIdentifier'])
@@ -226,15 +233,22 @@ if __name__ == "__main__":
                                                  float(record['boundingBox']['southBoundLatitude']), 
                                                  float(record['boundingBox']['northBoundLatitude']))
 
-        if (type(record['startTime']) == datetime) and (type(record['endTime']) == datetime):
-            schema_generator.set_temporal_extent(record['startTime'], record['endTime'])
-        elif (type(record['startTime']) == int) and (type(record['endTime']) == int):
-            start_date = datetime.strptime(str(record['startTime']),"%Y")
-            end_date = datetime.strptime(str(record['endTime']),"%Y")
+        start_time = record['startTime']
+        end_time = record['endTime']
+
+        if (type(start_time) == datetime) and (type(end_time) == datetime):
+            schema_generator.set_temporal_extent(start_time, end_time)
+        elif (type(start_time) == int) and (type(end_time) == int):
+            start_date = datetime.strptime(str(start_time),"%Y")
+            end_date = datetime.strptime(str(end_time),"%Y")
             schema_generator.set_temporal_extent(start_date, end_date)
         else:
-            print("Invalid start/end-times {} {}".format(record['startTime'], record['endTime']))
-
+            try:
+                start_time = datetime.strptime(start_time,"%Y/%m/%d %H:%M")
+                end_time = datetime.strptime(end_time,"%Y/%m/%d %H:%M")
+                schema_generator.set_temporal_extent(start_time, end_time)
+            except ValueError as e:
+                print("Invalid start/end-times {} {}".format(start_time, end_time))
 
         schema_generator.set_languages(record['languages'])
         schema_generator.set_characterset('utf8')
@@ -251,7 +265,10 @@ if __name__ == "__main__":
         spatial_representation_type = record['spatialRepresentationType']
         if str(spatial_representation_type) == 'nan':
             spatial_representation_type = ''
-        schema_generator.set_spatial_representation_type([spatial_representation_type])
+        rep_type_fixes = {'':'','vector':'vector', 'grid':'grid', \
+                          'texttable':'textTable', 'tin':'tin', 'stereomodel':'stereoModel', \
+                          'video':'video', 'image':'image'}
+        schema_generator.set_spatial_representation_type([rep_type_fixes[spatial_representation_type.lower()]])
         
         schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'].replace(' ',''),
                                                    record['referenceSystemName']['version'].replace(' ',''))
@@ -305,7 +322,12 @@ if __name__ == "__main__":
 
     print("Attempting to push records")
     for rec in converted_records:
+        #if rec['fileIdentifier'] != "510":
+        #    continue
         try:
+            #for resp in rec['responsibleParties']:
+            #    print(resp['contactInfo'])
+
             print("Pushing record: {}".format(rec['fileIdentifier']))
             metadata_publisher.add_a_record_to_ckan(
                 rec,
