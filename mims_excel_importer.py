@@ -5,7 +5,7 @@ import traceback
 import mims_schema_generator
 import metadata_publisher
 
-mims_sheet_file='./MIMS.Metadata.Master.Sheet.xlsx'
+mims_sheet_file='./mims.spreadsheet.schema.mappings.2019.12.5.xlsx'#'./MIMS.Metadata.Master.Sheet.xlsx'
 
 class RecordParseError(Exception):
     pass
@@ -233,22 +233,42 @@ if __name__ == "__main__":
                                                  float(record['boundingBox']['southBoundLatitude']), 
                                                  float(record['boundingBox']['northBoundLatitude']))
 
+        def convert_date(date_input):
+            def convert_str_to_date(date_str, str_format):
+                formatted_date = None
+                try:
+                    #print("trying to convert {} to {}".format(date_str, str_format))
+                    formatted_date = datetime.strptime(date_input,str_format)
+                    #print("result {}".format(formatted_date))
+                except:
+                    #print("Could not convert {} to {}".format(date_str, str_format))
+                    pass
+                return formatted_date
+            if type(date_input) == int:
+                return datetime.strptime(str(date_input),"%Y")
+            elif type(date_input) == unicode:
+                supported_formats = ["%Y/%m/%d %H:%M","%Y-%m-%d %H:%M:%S","%Y-%m-%d"] #2015/03/12 12:00
+                converted_date = None
+                for fmt in supported_formats:
+                    converted_date = convert_str_to_date(date_input, fmt)
+                    if converted_date:
+                        break
+                return converted_date
+
         start_time = record['startTime']
         end_time = record['endTime']
 
         if (type(start_time) == datetime) and (type(end_time) == datetime):
             schema_generator.set_temporal_extent(start_time, end_time)
-        elif (type(start_time) == int) and (type(end_time) == int):
-            start_date = datetime.strptime(str(start_time),"%Y")
-            end_date = datetime.strptime(str(end_time),"%Y")
-            schema_generator.set_temporal_extent(start_date, end_date)
         else:
-            try:
-                start_time = datetime.strptime(start_time,"%Y/%m/%d %H:%M")
-                end_time = datetime.strptime(end_time,"%Y/%m/%d %H:%M")
+            if type(start_time) != datetime:
+                start_time = convert_date(start_time)
+            if type(end_time) != datetime:
+                end_time = convert_date(end_time)
+            if start_time != None and end_time != None:
                 schema_generator.set_temporal_extent(start_time, end_time)
-            except ValueError as e:
-                print("Invalid start/end-times {} {}".format(start_time, end_time))
+            else:
+                print("Error! could not convert start/end times: {}/{}".format(start_time, end_time))
 
         schema_generator.set_languages(record['languages'])
         schema_generator.set_characterset('utf8')
@@ -335,7 +355,6 @@ if __name__ == "__main__":
                 'mims-metadata',
                 ['mims'],
                 'sans-1878-1')
-            
         except Exception as e:
             print(e)
             #break
