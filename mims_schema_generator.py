@@ -26,7 +26,8 @@ class MIMSSchemaGenerator:
     def set_date(self, date):
         if type(date) != datetime:
             raise MIMSSchemaFormatError("Invalid date type, must be datetime")
-        self.record["date"] = "{}-{}-{}".format(date.year, date.month, date.day)
+        #self.record["date"] = "{}-{}-{}".format(date.year, date.month, date.day)
+        self.record["date"] = date.strftime("%Y-%2m-%2d")
         #"date": "2019-11-02",
 
     def add_responsible_party(self, name='', organization='', contact_info='', role='', position_name='', online_resource=None):
@@ -82,7 +83,7 @@ class MIMSSchemaGenerator:
     def set_temporal_extent(self, start_time, end_time):
         if type(start_time) != datetime or type(end_time) != datetime:
                 raise MIMSSchemaFormatError("Invalid start/end time type, must be a datetime")
-        format="%Y-%m-%dT%H:%M:%S"
+        format="%Y-%2m-%2dT%H:%M:%S"
         start_time_str = start_time.strftime(format) + "+02:00"
         end_time_str = end_time.strftime(format) + "+02:00"
         temporal_extent = {
