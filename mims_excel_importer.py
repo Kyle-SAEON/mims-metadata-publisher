@@ -1,4 +1,5 @@
 from datetime import datetime
+import argparse
 import pandas
 import sys
 import traceback
@@ -187,8 +188,15 @@ class MIMSExcelImporter:
 
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--excel-file", required=True, help="location of the input Excel file")
+    parser.add_argument("--sheet", required=True, help="sheet name inside Excel file to process")
+    parser.add_argument("--publish", required=False, help="add publish option to publish records to metadata manager", action="store_true")
+    args = parser.parse_args()  
+
     importer = MIMSExcelImporter()
-    imported_records = importer.read_excel_to_json(mims_sheet_file, "CKAN_Geographic")
+    imported_records = importer.read_excel_to_json(args.excel_file, args.sheet)
     converted_records = []
 
     for record in imported_records:
@@ -335,19 +343,20 @@ if __name__ == "__main__":
 
         converted_records.append(schema_generator.get_filled_schema())
 
-    print("Attempting to push records")
-    for rec in converted_records:
-        try:
-            print("Pushing record: {}".format(rec['fileIdentifier']))
-            metadata_publisher.add_a_record_to_ckan(
-                rec,
-                'dea',
-                'mims-metadata',
-                ['mims'],
-                'sans-1878-1')
-        except Exception as e:
-            print(e)
+    if args.publish:
+        print("Attempting to push records")
+        for rec in converted_records:
+            try:
+                print("Pushing record: {}".format(rec['fileIdentifier']))
+                metadata_publisher.add_a_record_to_ckan(
+                    rec,
+                    'dea',
+                    'mims-metadata',
+                    ['mims'],
+                    'sans-1878-1')
+            except Exception as e:
+                print(e)
 
-    print(len(converted_records))
+        print(len(converted_records))
 
 
