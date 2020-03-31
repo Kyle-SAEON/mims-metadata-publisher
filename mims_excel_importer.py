@@ -335,19 +335,9 @@ if __name__ == "__main__":
 
         converted_records.append(schema_generator.get_filled_schema())
 
-    #print("\n\n First record \n\n")
-    #for key in converted_records[0].keys():
-    #    k,v = key, converted_records[0][key]
-    #    print("{} {}".format(k,v))
-
     print("Attempting to push records")
     for rec in converted_records:
-        #if rec['fileIdentifier'] != "510":
-        #    continue
         try:
-            #for resp in rec['responsibleParties']:
-            #    print(resp['contactInfo'])
-
             print("Pushing record: {}".format(rec['fileIdentifier']))
             metadata_publisher.add_a_record_to_ckan(
                 rec,
@@ -357,19 +347,7 @@ if __name__ == "__main__":
                 'sans-1878-1')
         except Exception as e:
             print(e)
-            #break
-            #pass
 
     print(len(converted_records))
-    #print(len(imported_records))
 
-    #for record in imported_records:
-    #    print("*")
-        #for auth in record['responsibleParties']:
-        #    #print(auth)
-        #    for k in auth.keys():
-        #        print("%r : %r" %(k, auth[k]))
-            
-        #print(record['Bounding Box'])
-        #print("\n")
 
