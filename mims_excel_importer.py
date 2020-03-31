@@ -278,8 +278,8 @@ if __name__ == "__main__":
         if str(spatial_resolution) == 'nan':
             spatial_resolution = ''
         schema_generator.set_spatial_resolution(spatial_resolution)
-        schema_generator.set_abstract("%r" % record['abstract'])
-
+        #schema_generator.set_abstract("%r" % record['abstract'])
+        schema_generator.set_abstract(record['abstract'].encode('ascii','ignore'))
         schema_generator.add_distribution_format(record['formatName'])
 
         spatial_representation_type = record['spatialRepresentationType']
