@@ -15,9 +15,9 @@ class MIMSExcelImporter:
     _required_columns = \
         ['fileIdentifier', 'DOI', 'date', 'metadataStandardName', 'metadataStandardVersion', \
          'metadataTimestamp', 'accessConstraints', 'descriptiveKeywords', 'title', 'responsibleParties', \
-         'responsibleParties.1','responsibleParties.2','keyword', 'topicCategories', 'abstract', 'languages', \
+         'responsibleParties.1','responsibleParties.2','keyword','instrumentKeywords','status','topicCategories', 'abstract', 'languages', \
          'formatName', 'spatialRepresentationType', 'spatialResolution', 'referenceSystemName', 'scope', \
-         'geographicIdentifier', 'boundingBox', 'verticalElement', 'startTime', 'endTime', 'rights', \
+         'geographicIdentifier','placeKeywords', 'boundingBox', 'verticalElement', 'startTime', 'endTime', 'rights', \
          'rightsURI', 'lineageStatement', 'onlineResources', 'relatedIdentifiers']
         #['ID','AlternateID MIMS full accession', 'DOI', 'Publication Date',\
         # 'MetaData Standard', 'Metadata date stamp', 'Access', 'Project / Collection',\
