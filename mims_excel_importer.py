@@ -254,7 +254,7 @@ if __name__ == "__main__":
                 return formatted_date
             if type(date_input) == int:
                 return datetime.strptime(str(date_input),"%Y")
-            elif type(date_input) == unicode:
+            elif type(date_input) == str:
                 supported_formats = ["%Y/%m/%d %H:%M","%Y-%m-%d %H:%M:%S","%Y-%m-%d"] #2015/03/12 12:00
                 converted_date = None
                 for fmt in supported_formats:
