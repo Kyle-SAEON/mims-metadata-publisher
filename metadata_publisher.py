@@ -3,8 +3,8 @@ import requests
 import logging
 import time
 
-ckan_base_url = 'http://192.168.115.56:8777'
-odp_ckan_api_key = 'db3d8e4f-0299-4ae9-9637-982198cf10d0'
+ckan_base_url = 'http://odpapi-migration.saeon.dvn/'
+odp_ckan_api_key = '67a5a3e2-dcec-4eca-8e38-91de3b70416d'
 
 logging.basicConfig(level=logging.INFO)
 
