@@ -17,7 +17,7 @@ class MIMSSchemaGenerator:
         }
         self.record["distributionFormats"] = []
         self.record["descriptiveKeywords"] = []
-        self.record["onlineResources"] = []
+        self.record["onlineResourceDescription"] = []
 
     def set_title(self, title):
         self.record["title"] = title

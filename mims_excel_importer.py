@@ -6,7 +6,7 @@ import traceback
 import mims_schema_generator
 import metadata_publisher
 
-mims_sheet_file='./mims.spreadsheet.schema.mappings.2019.12.5.xlsx'#'./MIMS.Metadata.Master.Sheet.xlsx'
+#mims_sheet_file='./mims.spreadsheet.schema.mappings.2019.12.5.xlsx'#'./MIMS.Metadata.Master.Sheet.xlsx'
 
 class RecordParseError(Exception):
     pass
@@ -15,10 +15,10 @@ class MIMSExcelImporter:
     _required_columns = \
         ['fileIdentifier', 'DOI', 'date', 'metadataStandardName', 'metadataStandardVersion', \
          'metadataTimestamp', 'accessConstraints', 'descriptiveKeywords', 'title', 'responsibleParties', \
-         'responsibleParties.1','responsibleParties.2','keyword','instrumentKeywords','status','topicCategories', 'abstract', 'languages', \
-         'formatName', 'spatialRepresentationType', 'spatialResolution', 'referenceSystemName', 'scope', \
-         'geographicIdentifier','placeKeywords', 'boundingBox', 'verticalElement', 'startTime', 'endTime', 'rights', \
-         'rightsURI', 'lineageStatement', 'onlineResources', 'relatedIdentifiers']
+         'responsibleParties.1','responsibleParties.Publisher','keyword','instrumentKeywords (CV)','status','topicCategories', 'abstract', \
+         'languages', 'formatName', 'spatialRepresentationType', 'spatialResolution', 'referenceSystemName', 'scope', \
+         'geographicIdentifier','placeKeywords (CV)', 'boundingBox', 'verticalElement', 'startTime', 'endTime', 'rights', \
+         'rightsURI', 'lineageStatement', 'onlineResourceDescription', 'relatedIdentifiers']
         #['ID','AlternateID MIMS full accession', 'DOI', 'Publication Date',\
         # 'MetaData Standard', 'Metadata date stamp', 'Access', 'Project / Collection',\
         # 'Title','Cited Authors','Responsible parties (Contributors)','Publisher',\
@@ -59,13 +59,13 @@ class MIMSExcelImporter:
         self.parse_file_identifier(record)
         self.parse_responsible_parties(record, 'responsibleParties')
         self.parse_responsible_parties(record, 'responsibleParties.1',True)
-        self.parse_responsible_parties(record, 'responsibleParties.2',True)
+        self.parse_responsible_parties(record, 'responsibleParties.Publisher',True)
 
         self.parse_column_list(record, 'keyword')
         self.parse_column_list(record, 'topicCategories')
         self.parse_field_to_dict(record,'relatedIdentifiers',
                                        ['relatedIdentifier', 'relatedIdentifierType', 'relationType'])
-        self.parse_field_to_dict(record,'onlineResources',
+        self.parse_field_to_dict(record,'onlineResourceDescription',
                                        ['name', 'description', 'linkage'])
         self.parse_field_to_dict(record,'referenceSystemName',
                                        ['codeSpace', 'version'])
@@ -74,6 +74,7 @@ class MIMSExcelImporter:
         self.parse_field_to_dict(record,'boundingBox',
                                        ['northBoundLatitude', 'southBoundLatitude',
                                        'eastBoundLongitude', 'westBoundLongitude'],True)
+       #TODO: Add the Place and Instruments for CV
 
     def parse_file_identifier(self, record):
         if type(record['fileIdentifier']) == float:
@@ -301,9 +302,9 @@ if __name__ == "__main__":
         schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'].replace(' ',''),
                                                    record['referenceSystemName']['version'].replace(' ',''))
         schema_generator.set_lineage_statement("%r" % record['lineageStatement'])
-        schema_generator.add_online_resources(record['onlineResources']['name'],
-                                              record['onlineResources']['description'].replace(' ',''),
-                                              record['onlineResources']['linkage'].replace(' ',''))  #name, description, link)
+        schema_generator.add_online_resources(record['onlineResourceDescription']['name'],
+                                              record['onlineResourceDescription']['description'].replace(' ',''),
+                                              record['onlineResourceDescription']['linkage'].replace(' ',''))  #name, description, link)
 
         schema_generator.set_file_identifier(record['fileIdentifier'])
 
