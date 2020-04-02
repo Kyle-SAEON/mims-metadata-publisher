@@ -302,12 +302,17 @@ if __name__ == "__main__":
         schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'].replace(' ',''),
                                                    record['referenceSystemName']['version'].replace(' ',''))
         schema_generator.set_lineage_statement("%r" % record['lineageStatement'])
-        schema_generator.add_online_resources(record['onlineResources']['name'],
+
+        online_resources = record['onlineResources']
+        if str(online_resources) == 'None':
+            pass
+        else:
+            schema_generator.add_online_resources(record['onlineResources']['name'],
                                               record['onlineResources']['description'].replace(' ',''),
                                               record['onlineResources']['linkage'].replace(' ',''))  #name, description, link)
+        #TODO: Checks for non mandatory fields need to be created
 
         schema_generator.set_file_identifier(record['fileIdentifier'])
-
         schema_generator.set_metadata_standard_name(record['metadataStandardName'])
         schema_generator.set_metadata_standard_version(str(record['metadataStandardVersion']))
         schema_generator.set_metadata_language("en")
