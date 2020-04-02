@@ -18,7 +18,7 @@ class MIMSExcelImporter:
          'responsibleParties.1','responsibleParties.Publisher','keyword','instrumentKeywords (CV)','status','topicCategories', 'abstract', \
          'languages', 'formatName', 'spatialRepresentationType', 'spatialResolution', 'referenceSystemName', 'scope', \
          'geographicIdentifier','placeKeywords (CV)', 'boundingBox', 'verticalElement', 'startTime', 'endTime', 'rights', \
-         'rightsURI', 'lineageStatement', 'onlineResourceDescription', 'relatedIdentifiers']
+         'rightsURI', 'lineageStatement', 'onlineResources', 'relatedIdentifiers']
         #['ID','AlternateID MIMS full accession', 'DOI', 'Publication Date',\
         # 'MetaData Standard', 'Metadata date stamp', 'Access', 'Project / Collection',\
         # 'Title','Cited Authors','Responsible parties (Contributors)','Publisher',\
@@ -65,7 +65,7 @@ class MIMSExcelImporter:
         self.parse_column_list(record, 'topicCategories')
         self.parse_field_to_dict(record,'relatedIdentifiers',
                                        ['relatedIdentifier', 'relatedIdentifierType', 'relationType'])
-        self.parse_field_to_dict(record,'onlineResourceDescription',
+        self.parse_field_to_dict(record,'onlineResources',
                                        ['name', 'description', 'linkage'])
         self.parse_field_to_dict(record,'referenceSystemName',
                                        ['codeSpace', 'version'])
@@ -302,9 +302,9 @@ if __name__ == "__main__":
         schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'].replace(' ',''),
                                                    record['referenceSystemName']['version'].replace(' ',''))
         schema_generator.set_lineage_statement("%r" % record['lineageStatement'])
-        schema_generator.add_online_resources(record['onlineResourceDescription']['name'],
-                                              record['onlineResourceDescription']['description'].replace(' ',''),
-                                              record['onlineResourceDescription']['linkage'].replace(' ',''))  #name, description, link)
+        schema_generator.add_online_resources(record['onlineResources']['name'],
+                                              record['onlineResources']['description'].replace(' ',''),
+                                              record['onlineResources']['linkage'].replace(' ',''))  #name, description, link)
 
         schema_generator.set_file_identifier(record['fileIdentifier'])
 
