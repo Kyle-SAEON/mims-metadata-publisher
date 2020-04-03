@@ -259,6 +259,7 @@ if __name__ == "__main__":
                 supported_formats = ["%Y/%m/%d %H:%M","%Y-%m-%d %H:%M:%S","%Y-%m-%d"] #2015/03/12 12:00
                 converted_date = None
                 for fmt in supported_formats:
+                    if date_input>
                     converted_date = convert_str_to_date(date_input, fmt)
                     if converted_date:
                         break
@@ -319,15 +320,16 @@ if __name__ == "__main__":
         schema_generator.set_metadata_characterset('utf8')
         #date = datetime.strptime(record['metadataTimestamp'],"%Y-%m-%d")
         if (str(record['metadataTimestamp'])) != "NaT":
-            schema_generator.set_metadata_time_stamp(record['metadataTimestamp'].to_pydatetime())
+            schema_generator.set_metadata_time_stamp(datetime.strptime((record['metadataTimestamp']),"%Y-%m-%d"))
         else:
-            print("Invalid metadata timestamp {} - Record id {}".format(record['metadataTimestamp'], 
+            print("Invalid metadata timestamp {} - Record id {}".format(record['metadataTimestamp'],
                   record['fileIdentifier']))
         schema_generator.set_purpose('')
         schema_generator.set_scope(record['scope'])
         schema_generator.set_status(['completed'])
         schema_generator.add_descritive_key_words(record['descriptiveKeywords']['keywordType'].replace(' ',''),
                                                   record['descriptiveKeywords']['keyword'])
+        #TODO: Add the place keywords and instrument keywords
 
         rights_uri = record['rightsURI']
         if str(rights_uri) == 'nan':
