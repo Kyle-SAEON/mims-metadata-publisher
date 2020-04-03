@@ -259,10 +259,15 @@ if __name__ == "__main__":
                 supported_formats = ["%Y/%m/%d %H:%M","%Y-%m-%d %H:%M:%S","%Y-%m-%d"] #2015/03/12 12:00
                 converted_date = None
                 for fmt in supported_formats:
-                    if date_input>
-                    converted_date = convert_str_to_date(date_input, fmt)
-                    if converted_date:
-                        break
+                    if len(date_input) == 10: #"%Y-%m-%d"
+                        converted_date = convert_str_to_date(date_input, supported_formats[2])
+                        #break
+                    elif len(date_input) == 16: #"%Y/%m/%d %H:%M"
+                        converted_date = convert_str_to_date(date_input, supported_formats[1])
+                    elif len(date_input) == 19: #"%Y-%m-%d %H:%M:%S"
+                        converted_date = convert_str_to_date(date_input, supported_formats[0])
+                    else:
+                        print('Unable to determine date format')
                 return converted_date
 
         start_time = record['startTime']
