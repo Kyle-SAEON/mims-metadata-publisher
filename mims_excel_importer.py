@@ -13,11 +13,11 @@ class RecordParseError(Exception):
 
 class MIMSExcelImporter:
     _required_columns = \
-        ['fileIdentifier', 'DOI', 'date', 'metadataStandardName', 'metadataStandardVersion', \
-         'metadataTimestamp', 'accessConstraints', 'descriptiveKeywords', 'title', 'responsibleParties', \
-         'responsibleParties.1','responsibleParties.Publisher','keyword','instrumentKeywords (CV)','status','topicCategories', 'abstract', \
-         'languages', 'formatName', 'spatialRepresentationType', 'spatialResolution', 'referenceSystemName', 'scope', \
-         'geographicIdentifier','placeKeywords (CV)', 'boundingBox', 'verticalElement', 'startTime', 'endTime', 'rights', \
+        ['fileIdentifier', 'DOI', 'date', 'metadataStandardName', 'metadataStandardVersion',
+         'metadataTimestamp', 'accessConstraints', 'descriptiveKeywords', 'title', 'responsibleParties',
+         'responsibleParties.1','responsibleParties.Publisher','keyword','instrumentKeywords (CV)','status','topicCategories', 'abstract',
+         'languages', 'formatName', 'spatialRepresentationType', 'spatialResolution', 'referenceSystemName', 'scope',
+         'geographicIdentifier','placeKeywords (CV)', 'boundingBox', 'verticalElement', 'startTime', 'endTime', 'rights',
          'rightsURI', 'lineageStatement', 'onlineResources', 'relatedIdentifiers']
         #['ID','AlternateID MIMS full accession', 'DOI', 'Publication Date',\
         # 'MetaData Standard', 'Metadata date stamp', 'Access', 'Project / Collection',\
@@ -69,12 +69,12 @@ class MIMSExcelImporter:
                                        ['name', 'description', 'linkage'])
         self.parse_field_to_dict(record,'referenceSystemName',
                                        ['codeSpace', 'version'])
-        self.parse_field_to_dict(record,'descriptiveKeywords',
-                                       ['keywordType', 'keyword'])
+        self.parse_place_keywords(record,'descriptiveKeywords',['keywordType', 'keyword'])
+        #self.parse_place_keywords(record,'placeKeywords (CV)',['keywordType', 'keyword'],True)
+        #self.parse_place_keywords(record, 'instrumentKeywords (CV)',['keywordType', 'keyword'],True)
         self.parse_field_to_dict(record,'boundingBox',
                                        ['northBoundLatitude', 'southBoundLatitude',
                                        'eastBoundLongitude', 'westBoundLongitude'],True)
-       #TODO: Add the Place and Instruments for CV
 
     def parse_file_identifier(self, record):
         if type(record['fileIdentifier']) == float:
@@ -159,6 +159,44 @@ class MIMSExcelImporter:
             except:
                 traceback.print_exc(file=sys.stdout)
                 raise RecordParseError("Invalid bounding box: {}".format(box_str))
+
+    def parse_place_keywords(self, record, field_name, valid_fields,all_fields=False, append_mode=False):
+        #valid_keys = []
+        descriptive_keywords = []
+        if str(field_name) == "descriptiveKeywords":
+            detail={'keywordType':'theme','keyword':''}
+            raw_str = record[field_name]
+            for item in raw_str.split("|"):
+                parts = item.split(':')
+                k, v = item.split(":")
+                k = k.replace(" ", "")
+                # if k not in valid_keys:
+                #     # print(k)
+                #     raise RecordParseError("bad field: {}".format(item))
+                detail[k] = v.replace(";", "")
+            descriptive_keywords.append(detail)
+            print("f")
+        record['descriptiveKeywords'] = descriptive_keywords
+
+        if not append_mode:
+            record['descriptiveKeywords'] = descriptive_keywords
+        else:
+            record['descriptiveKeywords'] = descriptive_keywords + descriptive_keywords
+
+        # elif str(field_name) == "instrumentKeywords (CV)":
+        #     detail = {'KeywordType': 'stratum', 'Keyword': ''}
+        #     temp.append(detail)
+        #     #
+        # elif str(field_name) == "placeKeywords (CV)":
+        #     detail= {'KeywordType': 'place', 'Keyword': ''}
+        #
+        #     temp.append(detail)
+        # else:
+        #     print("Invalid ")
+        #     #
+        #     # return
+
+
 
     def parse_field_to_dict(self, record, field_name, valid_fields,all_fields=False):
         related_ids_str = record[field_name]
@@ -287,6 +325,7 @@ if __name__ == "__main__":
         schema_generator.set_spatial_resolution(spatial_resolution)
         #schema_generator.set_abstract("%r" % record['abstract'])
         schema_generator.set_abstract(record['abstract'].encode('ascii','ignore'))
+        #TODO address the ascii encoding into bytes
         schema_generator.add_distribution_format(record['formatName'])
 
         spatial_representation_type = record['spatialRepresentationType']
@@ -357,7 +396,6 @@ if __name__ == "__main__":
                     rec,
                     'dea',
                     'mims-metadata',
-                    ['mims'],
                     'sans-1878-1')
             except Exception as e:
                 print(e)

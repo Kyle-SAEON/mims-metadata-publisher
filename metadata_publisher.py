@@ -23,14 +23,13 @@ UPDATE_METRICS = {
 #  "metadata_standard": "sans-1878-1",
 #  "metadata": {...}
 
-def add_a_record_to_ckan(metadat_record, institution, collection, infrastructures, metadata_standard):
+def add_a_record_to_ckan(metadat_record, institution, collection, metadata_standard):
     url = "{}/metadata/".format(ckan_base_url)
 
     print("Trying to add record into {}".format(institution))
     record_data = {
         "institution": institution,
         "collection": collection,
-        "infrastructures": infrastructures, # must be a list e.g. ["mims"]
         "metadata_standard": metadata_standard,
         "metadata": metadat_record
     }
