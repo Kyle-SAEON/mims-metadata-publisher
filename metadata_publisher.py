@@ -3,8 +3,9 @@ import requests
 import logging
 import time
 
-ckan_base_url = 'http://odpapi-migration.saeon.dvn/'
+ckan_base_url = 'http://odpapi-migration.saeon.dvn'
 odp_ckan_api_key = '67a5a3e2-dcec-4eca-8e38-91de3b70416d'
+method='POST'
 
 logging.basicConfig(level=logging.INFO)
 
@@ -17,31 +18,24 @@ UPDATE_METRICS = {
     'unpublished':0,
 }
 
-#  "institution": "dea",
-#  "collection": "mims-metadata",
-#  "infrastructures": ["mims"],
-#  "metadata_standard": "sans-1878-1",
-#  "metadata": {...}
-
 def add_a_record_to_ckan(metadat_record, institution, collection, metadata_standard):
-    url = "{}/metadata/".format(ckan_base_url)
+    #url = "{}/metadata/".format(ckan_base_url)
 
     print("Trying to add record into {}".format(institution))
     record_data = {
-        "institution": institution,
-        "collection": collection,
-        "metadata_standard": metadata_standard,
-        "metadata": metadat_record
+        'collection_key': collection,
+        'schema_key':metadata_standard,
+        'metadata': metadat_record,
     }
 
-    #print(record_data)
-    #print(odp_ckan_api_key)
-
-    response = requests.post(
-        url=url,
-        json=record_data,
-        headers={'Authorization': 'Bearer ' + odp_ckan_api_key}
-    )
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + odp_ckan_api_key,
+    }
+    url =  ckan_base_url + f'/{institution}/metadata/'
+    response = requests.post(url,json=record_data, headers=headers)
+    print("f")
 
     #print("{}\n{}\n{}".format(url, record_data,odp_ckan_api_key))
 

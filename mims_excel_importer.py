@@ -252,7 +252,7 @@ if __name__ == "__main__":
     parser.add_argument("--excel-file", required=True, help="location of the input Excel file")
     parser.add_argument("--sheet", required=True, help="sheet name inside Excel file to process")
     parser.add_argument("--publish", required=False, help="add publish option to publish records to metadata manager", action="store_true")
-    args = parser.parse_args()  
+    args = parser.parse_args()
 
     importer = MIMSExcelImporter()
     imported_records = importer.read_excel_to_json(args.excel_file, args.sheet)
@@ -284,20 +284,20 @@ if __name__ == "__main__":
             if len(rparty['email']) > 0:
                 contactInfo = contactInfo + "," + rparty['email']
 
-            role_fixes = {'':'','resourceprovider':'resourceProvider', 'custodian':'custodian', 'owner':'owner', 
-                          'user':'user', 'distributor':'distributor', 'originator':'originator', 
-                          'pointofcontact':'pointOfContact', 'principleinvestigator':'principalInvestigator', 
+            role_fixes = {'':'','resourceprovider':'resourceProvider', 'custodian':'custodian', 'owner':'owner',
+                          'user':'user', 'distributor':'distributor', 'originator':'originator',
+                          'pointofcontact':'pointOfContact', 'principleinvestigator':'principalInvestigator',
                           'principalinvestigator':'principalInvestigator','processor':'processor', 'publisher':'publisher'}
-        
-            schema_generator.add_responsible_party("%r" % rparty['individualName'], rparty['organizationName'], 
+
+            schema_generator.add_responsible_party("%r" % rparty['individualName'], rparty['organizationName'],
                                                    contactInfo, role_fixes[rparty['role'].lower()],
                                                    rparty['positionName'])#, online_resource)
 
         schema_generator.set_geographic_identifier(record['geographicIdentifier'])
         #print((record['boundingBox']))
-        schema_generator.set_bounding_box_extent(float(record['boundingBox']['westBoundLongitude']), 
-                                                 float(record['boundingBox']['eastBoundLongitude']), 
-                                                 float(record['boundingBox']['southBoundLatitude']), 
+        schema_generator.set_bounding_box_extent(float(record['boundingBox']['westBoundLongitude']),
+                                                 float(record['boundingBox']['eastBoundLongitude']),
+                                                 float(record['boundingBox']['southBoundLatitude']),
                                                  float(record['boundingBox']['northBoundLatitude']))
 
         def convert_date(date_input):
@@ -354,7 +354,7 @@ if __name__ == "__main__":
                           'texttable':'textTable', 'tin':'tin', 'stereomodel':'stereoModel', \
                           'video':'video', 'image':'image'}
         schema_generator.set_spatial_representation_type([rep_type_fixes[spatial_representation_type.lower()]])
-        
+
         schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'].replace(' ',''),
                                                    record['referenceSystemName']['version'].replace(' ',''))
         schema_generator.set_lineage_statement("%r" % record['lineageStatement'])
@@ -398,28 +398,24 @@ if __name__ == "__main__":
             identifier = remove_ri_errors(record['relatedIdentifiers']['relatedIdentifier'])
             id_type = remove_ri_errors(record['relatedIdentifiers']['relatedIdentifierType'])
             relation_type = remove_ri_errors(record['relatedIdentifiers']['relationType'])
-            schema_generator.set_related_identifiers(identifier, 
+            schema_generator.set_related_identifiers(identifier,
                                                     id_type,
                                                     relation_type)
 
 
         converted_records.append(schema_generator.get_filled_schema())
 
-    #pprint.pprint(converted_records)
-
+    pprint.pprint(converted_records)
+    rec = {
+        'titles': [{'title': 'Hello World'}]}
     if args.publish:
         print("Attempting to push records")
         for rec in converted_records:
             try:
                 print("Pushing record: {}".format(rec['fileIdentifier']))
-                metadata_publisher.add_a_record_to_ckan(
-                    rec,
-                    'dea',
-                    'mims-metadata',
-                    'sans-1878-1')
+                metadata_publisher.add_a_record_to_ckan(rec,'dea','sadco-test','sans-1878-1')
             except Exception as e:
                 print(e)
-
         print(len(converted_records))
 
 
