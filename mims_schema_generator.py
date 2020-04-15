@@ -172,7 +172,7 @@ class MIMSSchemaGenerator:
             raise MIMSSchemaFormatError("Invalid status type, must be a list")
         self.record["status"] = status
 
-    def add_descritive_key_words(self, keyword_type, keyword):
+    def add_descriptive_key_words(self, keyword_type, keyword):
         self.record["descriptiveKeywords"].append({
             "keywordType": keyword_type,
             "keyword": keyword
