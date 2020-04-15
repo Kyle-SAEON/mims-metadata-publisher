@@ -382,9 +382,8 @@ if __name__ == "__main__":
         schema_generator.set_purpose('')
         schema_generator.set_scope(record['scope'])
         schema_generator.set_status(['completed'])
-        schema_generator.add_descritive_key_words(record['descriptiveKeywords']['keywordType'].replace(' ',''),
-                                                  record['descriptiveKeywords']['keyword'])
-        #TODO: Add the place keywords and instrument keywords
+        for word in record['descriptiveKeywords']:
+            schema_generator.add_descriptive_key_words(word['keywordType'].replace(' ',''),word['keyword'])
 
         rights_uri = record['rightsURI']
         if str(rights_uri) == 'nan':
