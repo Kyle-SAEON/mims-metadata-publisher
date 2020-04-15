@@ -5,6 +5,7 @@ import sys
 import traceback
 import mims_schema_generator
 import metadata_publisher
+import pprint
 
 #mims_sheet_file='./mims.spreadsheet.schema.mappings.2019.12.5.xlsx'#'./MIMS.Metadata.Master.Sheet.xlsx'
 
@@ -342,9 +343,8 @@ if __name__ == "__main__":
         if str(spatial_resolution) == 'nan':
             spatial_resolution = ''
         schema_generator.set_spatial_resolution(spatial_resolution)
-        #schema_generator.set_abstract("%r" % record['abstract'])
-        schema_generator.set_abstract(record['abstract'].encode('ascii','ignore'))
-        #TODO address the ascii encoding into bytes
+        schema_generator.set_abstract("%r" % record['abstract'])
+        #schema_generator.set_abstract(record['abstract'].encode('ascii','ignore'))
         schema_generator.add_distribution_format(record['formatName'])
 
         spatial_representation_type = record['spatialRepresentationType']
@@ -404,6 +404,8 @@ if __name__ == "__main__":
 
 
         converted_records.append(schema_generator.get_filled_schema())
+
+    #pprint.pprint(converted_records)
 
     if args.publish:
         print("Attempting to push records")
