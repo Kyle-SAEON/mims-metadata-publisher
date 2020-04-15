@@ -69,9 +69,9 @@ class MIMSExcelImporter:
                                        ['name', 'description', 'linkage'])
         self.parse_field_to_dict(record,'referenceSystemName',
                                        ['codeSpace', 'version'])
-        self.parse_place_keywords(record,'descriptiveKeywords',['keywordType', 'keyword'])
+        self.parse_place_keywords(record,'descriptiveKeywords',['keywordType', 'keyword'],False)
         self.parse_place_keywords(record,'placeKeywords (CV)',['keywordType', 'keyword'],True)
-        #self.parse_place_keywords(record, 'instrumentKeywords (CV)',['keywordType', 'keyword'],True)
+        self.parse_place_keywords(record, 'instrumentKeywords (CV)',['keywordType', 'keyword'],True)
         self.parse_field_to_dict(record,'boundingBox',
                                        ['northBoundLatitude', 'southBoundLatitude',
                                        'eastBoundLongitude', 'westBoundLongitude'],True)
@@ -160,40 +160,59 @@ class MIMSExcelImporter:
                 traceback.print_exc(file=sys.stdout)
                 raise RecordParseError("Invalid bounding box: {}".format(box_str))
 
-    def parse_place_keywords(self, record, field_name, valid_fields,all_fields=False, append_mode=False):
+    def parse_place_keywords(self, record, field_name, valid_fields, append_mode=False):
         #valid_keys = []
         descriptive_keywords = []
         if str(field_name) == "descriptiveKeywords":
-            detail={'keywordType':'theme','keyword':''}
-            raw_str = record[field_name]
-            for item in raw_str.split("|"):
-                parts = item.split(':')
-                k, v = item.split(":")
-                k = k.replace(" ", "")
-                # if k not in valid_keys:
-                #     # print(k)
-                #     raise RecordParseError("bad field: {}".format(item))
-                detail[k] = v.replace(";", "")
-            descriptive_keywords.append(detail)
-            record['descriptiveKeywords'] = descriptive_keywords
-
-            if not append_mode:
-                record['descriptiveKeywords'] = descriptive_keywords
+            if str(record[field_name]) == 'nan':
+                return
             else:
-                record['descriptiveKeywords'] = descriptive_keywords + descriptive_keywords
+                detail={'keywordType':'theme','keyword':''}
+                raw_str = record[field_name]
+                for item in raw_str.split("|"):
+                    parts = item.split(':')
+                    k, v = item.split(":")
+                    k = k.replace(" ", "")
+                    # if k not in valid_keys:
+                    #     # print(k)
+                    #     raise RecordParseError("bad field: {}".format(item))
+                    detail[k] = v.replace(";", "")
+                descriptive_keywords.append(detail)
+                if not append_mode:
+                    record['descriptiveKeywords'] = descriptive_keywords
+                else:
+                    record['descriptiveKeywords'] = record['descriptiveKeywords'] + descriptive_keywords
 
         elif str(field_name) == "instrumentKeywords (CV)":
-            print("place holder")
+            if str(record[field_name]) == 'nan':
+                return
+            else:
+                raw_str = record[field_name]
+                for item in raw_str.split(","):
+                    detail = {'keywordType': 'stratum', 'keyword': ''}
+                    detail['keyword'] = item
+                    descriptive_keywords.append(detail)
+                if not append_mode:
+                    record['descriptiveKeywords'] = descriptive_keywords
+                else:
+                    record['descriptiveKeywords'] = record['descriptiveKeywords'] + descriptive_keywords
+
+        elif str(field_name) == "placeKeywords (CV)":
+            if str(record[field_name]) == 'nan':
+                return
+            else:
+                raw_str = record[field_name]
+                for item in raw_str.split(","):
+                    detail = {'keywordType': 'place', 'keyword': ''}
+                    detail['keyword'] = item
+                    descriptive_keywords.append(detail)
+                if not append_mode:
+                    record['descriptiveKeywords'] = descriptive_keywords
+                else:
+                    record['descriptiveKeywords'] = record['descriptiveKeywords'] + descriptive_keywords
+
         else:
             print("Invalid Keywords field")
-
-        #     detail = {'KeywordType': 'stratum', 'Keyword': ''}
-        #     temp.append(detail)
-        #     #
-        # elif str(field_name) == "placeKeywords (CV)":
-        #     detail= {'KeywordType': 'place', 'Keyword': ''}
-        #
-        #     temp.append(detail)
 
 
 
