@@ -115,8 +115,9 @@ class MIMSSchemaGenerator:
 
     def add_distribution_format(self, format_name, format_version=None):
         format = {"formatName": format_name}
-        if format_version:
-            format["formatVersion"] = format_version
+        # if format_version != list:
+        #     raise MIMSSchemaFormatError("Invalid distribution format type, must be a list")
+        #format["formatVersion"] = format_version
         self.record["distributionFormats"].append(format)
 
     def set_spatial_representation_type(self, represenation):
