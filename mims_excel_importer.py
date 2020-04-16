@@ -215,9 +215,6 @@ class MIMSExcelImporter:
         else:
             print("Invalid Keywords field")
 
-
-
-
     def parse_field_to_dict(self, record, field_name, valid_fields,all_fields=False):
         related_ids_str = record[field_name]
         if str(related_ids_str) == "nan":
@@ -381,7 +378,7 @@ if __name__ == "__main__":
                   record['fileIdentifier']))
         schema_generator.set_purpose('')
         schema_generator.set_scope(record['scope'])
-        schema_generator.set_status(['completed'])
+        schema_generator.set_status([record['status']])
         for word in record['descriptiveKeywords']:
             schema_generator.add_descriptive_key_words(word['keywordType'].replace(' ',''),word['keyword'])
 
