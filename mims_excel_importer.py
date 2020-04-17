@@ -386,10 +386,11 @@ if __name__ == "__main__":
         for word in record['descriptiveKeywords']:
             schema_generator.add_descriptive_key_words(word['keywordType'].replace(' ',''),word['keyword'])
 
-        rights_uri = record['rightsURI']
-        if str(rights_uri) == 'nan':
-            rights_uri = ''
+        rights_uri = record['rights']
+        if str(rights_uri) == 'restricted':
+            rights_uri = 'restricted'
         schema_generator.set_constraints(record['rights'], rights_uri, record['accessConstraints'])
+
 
 
         if record['relatedIdentifiers']:
@@ -406,9 +407,8 @@ if __name__ == "__main__":
 
         converted_records.append(schema_generator.get_filled_schema())
 
-    pprint.pprint(converted_records)
-    rec = {
-        'titles': [{'title': 'Hello World'}]}
+    #pprint.pprint(converted_records)
+
     if args.publish:
         print("Attempting to push records")
         for rec in converted_records:
