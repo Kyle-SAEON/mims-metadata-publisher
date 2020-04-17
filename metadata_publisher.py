@@ -35,7 +35,6 @@ def add_a_record_to_ckan(metadat_record, institution, collection, metadata_stand
     }
     url =  ckan_base_url + f'/{institution}/metadata/'
     response = requests.post(url,json=record_data, headers=headers)
-    print("f")
 
     #print("{}\n{}\n{}".format(url, record_data,odp_ckan_api_key))
 
