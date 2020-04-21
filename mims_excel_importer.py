@@ -5,6 +5,7 @@ import sys
 import traceback
 import mims_schema_generator
 import metadata_publisher
+import warnings
 import pprint
 
 #mims_sheet_file='./mims.spreadsheet.schema.mappings.2019.12.5.xlsx'#'./MIMS.Metadata.Master.Sheet.xlsx'
@@ -51,11 +52,13 @@ class MIMSExcelImporter:
             print("Error while reading excel speadsheet. {}".format(e))
             traceback.print_exc(file=sys.stdout)
         return raw_records
-    
+
     def parse_raw_record(self, record):
         for col in record.keys():
             if col not in self._required_columns:
-                raise Exception("Invalid column found: {}".format(col))
+                #raise Exception("required column missing: {}".format(col))
+                warnings.warn("Extra column found: {}".format(col))
+
         # parse where necessary
         self.parse_file_identifier(record)
         self.parse_responsible_parties(record, 'responsibleParties')
@@ -241,6 +244,13 @@ class MIMSExcelImporter:
                 if field not in record[field_name]:
                     raise RecordParseError("Invalid %r format: %r" % (field_name,str(record[field_name])))
 
+    def parse_date(self,record):
+        for fmt in ('%Y-%m-%d', '%d-%m-%Y', '%Y'):
+            try:
+                return datetime.strptime(str(record), fmt)
+            except ValueError:
+                pass
+        raise ValueError('no valid date format found')
 
 
 if __name__ == "__main__":
@@ -258,17 +268,22 @@ if __name__ == "__main__":
     for record in imported_records:
         schema_generator = mims_schema_generator.MIMSSchemaGenerator()
         schema_generator.set_title(record['title'])
+
         if type(record['date']) == str:
-            date = datetime.strptime(record['date'],"%Y-%m-%d")
+            #date = datetime.strptime(record['date'],"%Y-%m-%d")
+            date = importer.parse_date(record['date'])
             schema_generator.set_date(date)
         elif type(record['date']) == int:
-            date = datetime.strptime(str(record['date']),"%Y")
+            date = importer.parse_date(record['date'])
+            schema_generator.set_date(date)
+        elif type(record['date']) == float:
+            date = importer.parse_date(record['date'])
             schema_generator.set_date(date)
         elif type(record['date']) == datetime:
             date = record['date']
             schema_generator.set_date(date)
         else:
-            date = datetime.strptime(record['date'],"%Y-%m-%d")
+            date = importer.parse_date(record['date'])
             schema_generator.set_date(date)
 
         for rparty in record['responsibleParties']:
