@@ -19,7 +19,7 @@ class MIMSSchemaGenerator:
         }
         self.record["distributionFormats"] = []
         self.record["descriptiveKeywords"] = []
-        self.record["onlineResourceDescription"] = []
+        self.record["onlineResources"] = []
 
     def set_title(self, title):
         self.record["title"] = title
@@ -41,6 +41,7 @@ class MIMSSchemaGenerator:
             'positionName': position_name,
             'role': role,
         }
+        print('lul')
 
         if online_resource:
             link = {"linkage": online_resource}
@@ -131,11 +132,13 @@ class MIMSSchemaGenerator:
     def set_lineage_statement(self, lineage):
         self.record["lineageStatement"] = lineage
 
-    def add_online_resources(self, name, description, link):
-        self.record["onlineResources"].append({
+    def add_online_resources(self, name='', description='', link=''):
+        online_resource = {
             "name": name,
             "description": description,
-            "linkage": link})
+            "linkage": link
+        }
+        self.record["onlineResources"].append(online_resource)
 
     def set_file_identifier(self, file_identifier):
         if type(file_identifier) != str:
