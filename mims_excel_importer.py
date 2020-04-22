@@ -5,8 +5,6 @@ import sys
 import traceback
 import mims_schema_generator
 import metadata_publisher
-import warnings
-import pprint
 
 #mims_sheet_file='./mims.spreadsheet.schema.mappings.2019.12.5.xlsx'#'./MIMS.Metadata.Master.Sheet.xlsx'
 
@@ -57,7 +55,7 @@ class MIMSExcelImporter:
         for col in record.keys():
             if col not in self._required_columns:
                 #raise Exception("required column missing: {}".format(col))
-                warnings.warn("Extra column found: {}".format(col))
+                print("Extra column found: {}".format(col))
 
         # parse where necessary
         self.parse_file_identifier(record)
@@ -271,9 +269,22 @@ if __name__ == "__main__":
     imported_records = importer.read_excel_to_json(args.excel_file, args.sheet)
     converted_records = []
 
+
+
+
     for record in imported_records:
         schema_generator = mims_schema_generator.MIMSSchemaGenerator()
         schema_generator.set_title(record['title'])
+
+        def convert_date(date_input):
+            supported_formats = ["%Y-%m-%d", "%d-%m-%Y", '%Y', "%Y/%m/%d %H:%M",
+                                 "%Y-%m-%d %H:%M:%S"]  # 2015/03/12 12:00
+            for fmt in supported_formats:
+                try:
+                    return datetime.strptime(str(date_input), fmt)
+                except ValueError:
+                    pass
+            raise ValueError('no valid date format found')
 
         if type(record['date']) == str:
             date = convert_date(record['date'])
@@ -316,16 +327,6 @@ if __name__ == "__main__":
                                                  float(record['boundingBox']['eastBoundLongitude']),
                                                  float(record['boundingBox']['southBoundLatitude']),
                                                  float(record['boundingBox']['northBoundLatitude']))
-
-        def convert_date(date_input):
-            supported_formats = ["%Y-%m-%d","%d-%m-%Y",'%Y',"%Y/%m/%d %H:%M","%Y-%m-%d %H:%M:%S"]  # 2015/03/12 12:00
-            for fmt in supported_formats:
-                try:
-                    return datetime.strptime(str(date_input), fmt)
-                except ValueError:
-                    pass
-            raise ValueError('no valid date format found')
-
 
         start_time = record['startTime']
         end_time = record['endTime']
@@ -385,7 +386,7 @@ if __name__ == "__main__":
         schema_generator.set_metadata_characterset('utf8')
         #date = datetime.strptime(record['metadataTimestamp'],"%Y-%m-%d")
         if (str(record['metadataTimestamp'])) != "NaT":
-            schema_generator.set_metadata_time_stamp(datetime.strptime((record['metadataTimestamp']),"%Y-%m-%d"))
+            schema_generator.set_metadata_time_stamp(convert_date(record['metadataTimestamp']))
         else:
             print("Invalid metadata timestamp {} - Record id {}".format(record['metadataTimestamp'],
                   record['fileIdentifier']))
