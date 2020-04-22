@@ -258,14 +258,6 @@ class MIMSExcelImporter:
                 if field not in record[field_name]:
                     raise RecordParseError("Invalid %r format: %r" % (field_name,str(record[field_name])))
 
-    def parse_date(self,record):
-        for fmt in ('%Y-%m-%d', '%d-%m-%Y', '%Y'):
-            try:
-                return datetime.strptime(str(record), fmt)
-            except ValueError:
-                pass
-        raise ValueError('no valid date format found')
-
 
 if __name__ == "__main__":
 
@@ -284,19 +276,19 @@ if __name__ == "__main__":
         schema_generator.set_title(record['title'])
 
         if type(record['date']) == str:
-            date = importer.parse_date(record['date'])
+            date = convert_date(record['date'])
             schema_generator.set_date(date)
         elif type(record['date']) == int:
-            date = importer.parse_date(record['date'])
+            date = convert_date(record['date'])
             schema_generator.set_date(date)
         elif type(record['date']) == float:
-            date = importer.parse_date(record['date'])
+            date = convert_date(record['date'])
             schema_generator.set_date(date)
         elif type(record['date']) == datetime:
             date = record['date']
             schema_generator.set_date(date)
         else:
-            date = importer.parse_date(record['date'])
+            date = convert_date(record['date'])
             schema_generator.set_date(date)
 
         for rparty in record['responsibleParties']:
@@ -326,24 +318,14 @@ if __name__ == "__main__":
                                                  float(record['boundingBox']['northBoundLatitude']))
 
         def convert_date(date_input):
-            def convert_str_to_date(date_str, str_format):
-                formatted_date = None
+            supported_formats = ["%Y-%m-%d","%d-%m-%Y",'%Y',"%Y/%m/%d %H:%M","%Y-%m-%d %H:%M:%S"]  # 2015/03/12 12:00
+            for fmt in supported_formats:
                 try:
-                    #print("trying to convert {} to {}".format(date_str, str_format))
-                    formatted_date = datetime.strptime(date_input,str_format)
-                    #print("result {}".format(formatted_date))
-                except:
-                    #print("Could not convert {} to {}".format(date_str, str_format))
+                    return datetime.strptime(str(date_input), fmt)
+                except ValueError:
                     pass
-                return formatted_date
-            if type(date_input) == int:
-                return datetime.strptime(str(date_input),"%Y")
-            elif type(date_input) == str:
-                supported_formats = ["%Y/%m/%d %H:%M","%Y-%m-%d %H:%M:%S","%Y-%m-%d"] #2015/03/12 12:00
-                converted_date = None
-                for fmt in supported_formats:
-                    converted_date = convert_str_to_date(date_input, fmt)
-                return converted_date
+            raise ValueError('no valid date format found')
+
 
         start_time = record['startTime']
         end_time = record['endTime']
@@ -396,7 +378,7 @@ if __name__ == "__main__":
             else:
                 schema_generator.add_online_resources(rsc['name'],rsc['description'],rsc['linkage'])  #name, description, link)
 
-        schema_generator.set_file_identifier(record['fileIdentifier'])
+        schema_generator.set_file_identifier(str(record['fileIdentifier']))
         schema_generator.set_metadata_standard_name(record['metadataStandardName'])
         schema_generator.set_metadata_standard_version(str(record['metadataStandardVersion']))
         schema_generator.set_metadata_language("en")
