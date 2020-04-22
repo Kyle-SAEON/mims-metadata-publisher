@@ -69,8 +69,7 @@ class MIMSExcelImporter:
         self.parse_column_list(record, 'topicCategories')
         self.parse_field_to_dict(record,'relatedIdentifiers',
                                        ['relatedIdentifier', 'relatedIdentifierType', 'relationType'])
-        self.parse_field_to_dict(record,'onlineResources',
-                                       ['name', 'description', 'linkage'])
+        self.parse_online_resources(record,'onlineResources')
         self.parse_field_to_dict(record,'referenceSystemName',
                                        ['codeSpace', 'version'])
         self.parse_place_keywords(record,'descriptiveKeywords',['keywordType', 'keyword'],False)
@@ -131,6 +130,21 @@ class MIMSExcelImporter:
         else:
             record['responsibleParties'] = record['responsibleParties'] + responsible_parties
 
+    def parse_online_resources(self, record, field):
+        valid_keys = ['name', 'description', 'linkage']
+        resource = []
+        raw_str = record[field]
+        for detail_str in raw_str.split(";"):
+            if len(detail_str.replace(" ", "")) > 0:
+                detail = {'name': '', 'description': '', 'linkage': ''}
+                for item in detail_str.split("|"):
+                   k, v = item.split(":",1)
+                   k = k.replace(" ", "")
+                   detail[k] = v.replace(";","")
+                resource.append(detail)
+        record[field] = resource
+        #resource.append(detail)
+        #raise print('error')
 
     def parse_column_list(self, record, column):
         if ',' in record[column]:
@@ -270,7 +284,6 @@ if __name__ == "__main__":
         schema_generator.set_title(record['title'])
 
         if type(record['date']) == str:
-            #date = datetime.strptime(record['date'],"%Y-%m-%d")
             date = importer.parse_date(record['date'])
             schema_generator.set_date(date)
         elif type(record['date']) == int:
@@ -377,13 +390,12 @@ if __name__ == "__main__":
             lineage_statement = ''
         schema_generator.set_lineage_statement(lineage_statement)
 
-        online_resources = record['onlineResources']
-        if str(online_resources) == 'None':
-            pass
-        else:
-            schema_generator.add_online_resources(record['onlineResources']['name'],
-                                              record['onlineResources']['description'].replace(' ',''),
-                                              record['onlineResources']['linkage'].replace(' ',''))  #name, description, link)
+        for rsc in record['onlineResources']:
+            if str(rsc) == 'None':
+                schema_generator.online_resources = ''
+            else:
+                schema_generator.add_online_resources(rsc['name'],rsc['description'],rsc['linkage'])  #name, description, link)
+
         schema_generator.set_file_identifier(record['fileIdentifier'])
         schema_generator.set_metadata_standard_name(record['metadataStandardName'])
         schema_generator.set_metadata_standard_version(str(record['metadataStandardVersion']))
