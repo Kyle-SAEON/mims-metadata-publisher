@@ -41,7 +41,6 @@ class MIMSSchemaGenerator:
             'positionName': position_name,
             'role': role,
         }
-        print('lul')
 
         if online_resource:
             link = {"linkage": online_resource}
