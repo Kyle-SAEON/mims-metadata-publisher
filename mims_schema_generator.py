@@ -133,9 +133,9 @@ class MIMSSchemaGenerator:
 
     def add_online_resources(self, name='', description='', link=''):
         online_resource = {
-            "name": name,
-            "description": description,
-            "linkage": link
+            "name": name.replace(" ",""),
+            "description": description.replace(" ",""),
+            "linkage": link.replace(" ","")
         }
         self.record["onlineResources"].append(online_resource)
 

@@ -3,6 +3,8 @@ import requests
 import logging
 import time
 
+from requests.models import Response
+
 ckan_base_url = 'http://odpapi-migration.saeon.dvn'
 odp_ckan_api_key = '67a5a3e2-dcec-4eca-8e38-91de3b70416d'
 method='POST'
@@ -33,7 +35,7 @@ def add_a_record_to_ckan(metadat_record, institution, collection, metadata_stand
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + odp_ckan_api_key,
     }
-    url =  ckan_base_url + f'/{institution}/metadata/'
+    url = ckan_base_url + f'/{institution}/metadata/'
     response = requests.post(url,json=record_data, headers=headers)
 
     #print("{}\n{}\n{}".format(url, record_data,odp_ckan_api_key))
@@ -117,10 +119,7 @@ def add_a_record_to_ckan(metadat_record, institution, collection, metadata_stand
         logging.error(result)
     #    #print(result)
     """
-
-
     return result
-
 
 def check_ckan_added(institution, result):
     time.sleep(1)
@@ -146,49 +145,42 @@ def check_ckan_added(institution, result):
         found = True
     return found
 
-def set_workflow_state(state, record_id):
-    data = {
-        'workflow_state': state
+def set_workflow_state(record,institution,state):
+
+    print("Trying to change record workflow state into {}".format(state))
+
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + odp_ckan_api_key,
     }
+    # url='http://odpapi-migration.saeon.dvn/dea/metadata/workflow/b67bf8cb-55c3-426b-ac33-82ea3be62bd8?state=Published'
+    url = ckan_base_url + f"/{institution}/metadata/workflow/{record['fileIdentifier']}?state={state}"
+    response = requests.post(url, headers=headers)
+    result = json.loads(response.text)
 
-    url = "{}/metadata/workflow/{}".format(
-        ckan_base_url, record_id)
-    response = requests.post(
-        url=url,
-        params=data,
-        headers={'Authorization': 'Bearer ' + odp_ckan_api_key}
-    )
-
-    result = None
-    try:
-        result = json.loads(response.text)
-    except Exception:
-        logging.error("Couldn't decode resoponse {} {}".format(response.status_code, response.text))
-        raise RuntimeError('Request failed with return code: %s' % (
-            response.status_code))
-
-    print("set workflow state result {}".format(result))
-    state_unchanged = False
-    if response.status_code != 200 and ('message' not in result['detail']):
-        raise RuntimeError('Request failed with return code: %s' % (
-            response.status_code))
-    if response.status_code != 200 and ('message' in result['detail']) and \
-        (result['detail']['message'] != \
-            'The metadata record is already assigned the specified workflow state'):
-        raise RuntimeError('Request failed with return code: %s' % (
-            response.status_code))
-    elif response.status_code != 200 and ('message' in result['detail']) and \
-        (result['detail']['message'] == \
-            'The metadata record is already assigned the specified workflow state'):
-        logging.info('The metadata record is already assigned the specified workflow state {}'.format(state))
-        state_unchanged = True
-
-    if not state_unchanged and result['success']:#
-        msg = 'Workflow status updated to {}'.format(state)
-        logging.info(msg)
-        return True
-    else:
-        if not state_unchanged:
-            msg = 'Workflow status could not be updated!\n Error {}'.format(result)
-            logging.error(msg)
-            return False
+    # if response['success']:
+    #     print('lul')
+    # if response.status_code == 200 and response.success == 'False':
+    #     raise RuntimeError('Request failed with return code: %s' % (response.errors))
+    # if response.status_code != 200 and ('message' in result['detail']) and \
+    #     (result['detail']['message'] != \
+    #         'The metadata record is already assigned the specified workflow state'):
+    #     raise RuntimeError('Request failed with return code: %s' % (
+    #         response.status_code))
+    # elif response.status_code != 200 and ('message' in result['detail']) and \
+    #     (result['detail']['message'] == \
+    #         'The metadata record is already assigned the specified workflow state'):
+    #     logging.info('The metadata record is already assigned the specified workflow state {}'.format(state))
+    #     state_unchanged = True
+    #
+    # if not state_unchanged and result['success']:#
+    #     msg = 'Workflow status updated to {}'.format(state)
+    #     logging.info(msg)
+    #     return True
+    # else:
+    #     if not state_unchanged:
+    #         msg = 'Workflow status could not be updated!\n Error {}'.format(result)
+    #         logging.error(msg)
+    #         return False
+    #TODO Write the error codes
