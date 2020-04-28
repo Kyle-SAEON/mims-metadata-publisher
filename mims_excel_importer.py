@@ -5,6 +5,8 @@ import sys
 import traceback
 import mims_schema_generator
 import metadata_publisher
+import pprint
+import json
 
 #mims_sheet_file='./mims.spreadsheet.schema.mappings.2019.12.5.xlsx'#'./MIMS.Metadata.Master.Sheet.xlsx'
 
@@ -129,20 +131,21 @@ class MIMSExcelImporter:
             record['responsibleParties'] = record['responsibleParties'] + responsible_parties
 
     def parse_online_resources(self, record, field):
-        valid_keys = ['name', 'description', 'linkage']
-        resource = []
-        raw_str = record[field]
-        for detail_str in raw_str.split(";"):
-            if len(detail_str.replace(" ", "")) > 0:
-                detail = {'name': '', 'description': '', 'linkage': ''}
-                for item in detail_str.split("|"):
-                   k, v = item.split(":",1)
-                   k = k.replace(" ", "")
-                   detail[k] = v.replace(";","")
-                resource.append(detail)
-        record[field] = resource
-        #resource.append(detail)
-        #raise print('error')
+        if str(record[field]) == 'nan':
+            record[field] = ''
+        else:
+            valid_keys = ['name', 'description', 'linkage']
+            resource = []
+            raw_str = record[field]
+            for detail_str in raw_str.split(";"):
+                if len(detail_str.replace(" ", "")) > 0:
+                    detail = {'name': '', 'description': '', 'linkage': ''}
+                    for item in detail_str.split("|"):
+                       k, v = item.split(":",1)
+                       k = k.replace(" ", "")
+                       detail[k] = v.replace(";","")
+                    resource.append(detail)
+            record[field] = resource
 
     def parse_column_list(self, record, column):
         if ',' in record[column]:
@@ -263,6 +266,7 @@ if __name__ == "__main__":
     parser.add_argument("--excel-file", required=True, help="location of the input Excel file")
     parser.add_argument("--sheet", required=True, help="sheet name inside Excel file to process")
     parser.add_argument("--publish", required=False, help="add publish option to publish records to metadata manager", action="store_true")
+    parser.add_argument("--state",required=False,help ="Change the state of an record inside of the ODP" )
     args = parser.parse_args()
 
     importer = MIMSExcelImporter()
@@ -390,7 +394,7 @@ if __name__ == "__main__":
         else:
             print("Invalid metadata timestamp {} - Record id {}".format(record['metadataTimestamp'],
                   record['fileIdentifier']))
-        schema_generator.set_purpose('')
+        schema_generator.set_purpose("")
         schema_generator.set_scope(record['scope'])
         schema_generator.set_status([record['status']])
         for word in record['descriptiveKeywords']:
@@ -418,15 +422,25 @@ if __name__ == "__main__":
         converted_records.append(schema_generator.get_filled_schema())
 
     #pprint.pprint(converted_records)
+    #with open('data.txt', 'w') as outfile:
+    #    json.dump(converted_records, outfile)
 
     if args.publish:
         print("Attempting to push records")
         for rec in converted_records:
             try:
                 print("Pushing record: {}".format(rec['fileIdentifier']))
-                metadata_publisher.add_a_record_to_ckan(rec,'dea','sadco-test','sans-1878-1')
+                metadata_publisher.add_a_record_to_ckan(rec,'dea','mims-ams','sans-1878-1')
             except Exception as e:
                 print(e)
         print(len(converted_records))
 
-
+    if args.state:
+        print("Attempting to change state of records")
+        for rec in converted_records:
+            try:
+                #if rec['metadataStandardName'] = 'SANS1878'
+                print(f"Changing record: {rec['fileIdentifier']} to {args.state}")
+                metadata_publisher.set_workflow_state(rec,'dea',args.state)
+            except Exception as e:
+                print(e)
