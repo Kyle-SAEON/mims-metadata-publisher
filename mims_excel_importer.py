@@ -357,10 +357,10 @@ if __name__ == "__main__":
         schema_generator.set_spatial_resolution(spatial_resolution)
         schema_generator.set_abstract("%r" % record['abstract'])
         #schema_generator.set_abstract(record['abstract'].encode('ascii','ignore'))
-        format_name = record['formatName']
-        if str(format_name) == 'nan':
-            format_name = ''
-        schema_generator.add_distribution_format(format_name)
+        if str(record['formatName']) == 'nan':
+            schema_generator.add_distribution_format('')
+        else:
+            schema_generator.add_distribution_format(record['formatName'])
 
         spatial_representation_type = record['spatialRepresentationType']
         if str(spatial_representation_type) == 'nan':
@@ -425,8 +425,8 @@ if __name__ == "__main__":
         converted_records.append(schema_generator.get_filled_schema())
 
     pprint.pprint(converted_records)
-    with open('data.txt', 'w') as outfile:
-        json.dump(converted_records, outfile)
+    #with open('data.txt', 'w') as outfile:
+    #    json.dump(converted_records, outfile)
 
     if args.publish:
         print("Attempting to push records")
