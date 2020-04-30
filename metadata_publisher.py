@@ -183,4 +183,4 @@ def set_workflow_state(record,institution,state):
     #         msg = 'Workflow status could not be updated!\n Error {}'.format(result)
     #         logging.error(msg)
     #         return False
-    #TODO Write the error codes
+    #TODO Write the changing state error codes
