@@ -371,7 +371,7 @@ if __name__ == "__main__":
         schema_generator.set_spatial_representation_type([rep_type_fixes[spatial_representation_type.lower()]])
 
         if record['referenceSystemName'] is None:
-            break
+            pass
         else:
             schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'].replace(' ',''),
                                                    record['referenceSystemName']['version'].replace(' ',''))
