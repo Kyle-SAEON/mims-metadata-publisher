@@ -371,7 +371,7 @@ if __name__ == "__main__":
         schema_generator.set_spatial_representation_type([rep_type_fixes[spatial_representation_type.lower()]])
 
         if record['referenceSystemName'] is None:
-            schema_generator.set_reference_system_name('','')
+            break
         else:
             schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'].replace(' ',''),
                                                    record['referenceSystemName']['version'].replace(' ',''))
@@ -424,9 +424,9 @@ if __name__ == "__main__":
 
         converted_records.append(schema_generator.get_filled_schema())
 
-    #pprint.pprint(converted_records)
-    #with open('data.txt', 'w') as outfile:
-    #    json.dump(converted_records, outfile)
+    pprint.pprint(converted_records)
+    with open('data.txt', 'w') as outfile:
+        json.dump(converted_records, outfile)
 
     if args.publish:
         print("Attempting to push records")
