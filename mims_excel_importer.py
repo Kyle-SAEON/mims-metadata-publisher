@@ -370,7 +370,10 @@ if __name__ == "__main__":
                           'video':'video', 'image':'image'}
         schema_generator.set_spatial_representation_type([rep_type_fixes[spatial_representation_type.lower()]])
 
-        schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'].replace(' ',''),
+        if record['referenceSystemName'] is None:
+            schema_generator.set_reference_system_name('','')
+        else:
+            schema_generator.set_reference_system_name(record['referenceSystemName']['codeSpace'].replace(' ',''),
                                                    record['referenceSystemName']['version'].replace(' ',''))
         lineage_statement = record['lineageStatement']
         if str(lineage_statement) == 'nan':
