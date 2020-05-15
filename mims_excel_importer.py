@@ -190,7 +190,7 @@ class MIMSExcelImporter:
                 raw_str = record[field_name]
                 for item in raw_str.split("|"):
                     parts = item.split(':')
-                    k, v = item.split(":")
+                    k, v = item.split(":",1)
                     k = k.replace(" ", "")
                     # if k not in valid_keys:
                     #     # print(k)
@@ -355,8 +355,8 @@ if __name__ == "__main__":
         if str(spatial_resolution) == 'nan':
             spatial_resolution = ''
         schema_generator.set_spatial_resolution(spatial_resolution)
-        schema_generator.set_abstract("%r" % record['abstract'])
-        #schema_generator.set_abstract(record['abstract'].encode('ascii','ignore'))
+        #schema_generator.set_abstract("%r" % record['abstract'])
+        schema_generator.set_abstract(record['abstract'].encode('ascii', 'ignore').decode('ascii'))
         if str(record['formatName']) == 'nan':
             schema_generator.add_distribution_format('')
         else:
@@ -378,7 +378,7 @@ if __name__ == "__main__":
         lineage_statement = record['lineageStatement']
         if str(lineage_statement) == 'nan':
             lineage_statement = ''
-        schema_generator.set_lineage_statement(lineage_statement)
+        schema_generator.set_lineage_statement(lineage_statement.encode('ascii', 'ignore').decode('ascii'))
 
         for rsc in record['onlineResources']:
             if str(rsc) == 'None':
@@ -424,7 +424,7 @@ if __name__ == "__main__":
 
         converted_records.append(schema_generator.get_filled_schema())
 
-    pprint.pprint(converted_records)
+    #pprint.pprint(converted_records)
     #with open('data.txt', 'w') as outfile:
     #    json.dump(converted_records, outfile)
 
@@ -433,7 +433,7 @@ if __name__ == "__main__":
         for rec in converted_records:
             try:
                 print("Pushing record: {}".format(rec['fileIdentifier']))
-                metadata_publisher.add_a_record_to_ckan(rec,'dea','mims-ams','sans-1878-1')
+                metadata_publisher.add_a_record_to_ckan(rec,'dea','mims-historical','sans-1878-mims-historical-1')
             except Exception as e:
                 print(e)
         print(len(converted_records))
