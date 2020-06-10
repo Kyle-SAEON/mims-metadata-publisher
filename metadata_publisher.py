@@ -5,8 +5,8 @@ import time
 
 from requests.models import Response
 
-ckan_base_url = 'https://odpapi.saeon.dvn'
-odp_ckan_api_key = 'Yw2Zn_adEF8tRZ627xVs_vRpY6jsDoBgGVkfl4y5anQ.yM8hZ2THBFtaT78ZHKm3Hmq-WCLiAC-s-JkV_zUWI54'
+ckan_base_url = 'https://odp.saeon.dvn/api'
+odp_ckan_api_key = '6EsTdo8_bRZL8jMvC3cmGbNBaQCW6-4_IZTpQ5OPx3Y.QsX8UTRnpEWUnIWoe7j4jHpiHWyJ93N94PlK-doEzUY'
 method='POST'
 
 logging.basicConfig(level=logging.INFO)
@@ -27,7 +27,7 @@ def add_a_record_to_ckan(metadat_record, institution, collection, metadata_stand
     record_data = {
         'collection_key': collection,
         'schema_key':metadata_standard,
-        'metadata': metadat_record,
+        'metadata': metadat_record
     }
 
     headers = {
@@ -36,7 +36,7 @@ def add_a_record_to_ckan(metadat_record, institution, collection, metadata_stand
         'Authorization': 'Bearer ' + odp_ckan_api_key,
     }
     url = ckan_base_url + f'/{institution}/metadata/'
-    response = requests.post(url,json=record_data, headers=headers,verify=False)
+    response = requests.post(url,json=record_data, headers=headers)
 
     #print("{}\n{}\n{}".format(url, record_data,odp_ckan_api_key))
 
@@ -50,7 +50,7 @@ def add_a_record_to_ckan(metadat_record, institution, collection, metadata_stand
             response.status_code))
     result = json.loads(response.text)
 
-    #print("Response keys {}".format(result.keys()))
+    print("Response keys {}".format(result.keys()))
     #TODO: create error checks for check_ckan_added
     # if check_ckan_added(institution, result):
     #     msg = 'Added Successfully'

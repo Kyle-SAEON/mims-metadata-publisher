@@ -424,8 +424,8 @@ if __name__ == "__main__":
 
         converted_records.append(schema_generator.get_filled_schema())
 
-    #pprint.pprint(converted_records)
-    #with open('data.txt', 'w') as outfile:
+    # pprint.pprint(converted_records)
+    # with open('data.txt', 'w') as outfile:
     #    json.dump(converted_records, outfile)
 
     if args.publish:
