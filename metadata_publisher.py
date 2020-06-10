@@ -27,7 +27,11 @@ def add_a_record_to_ckan(metadat_record, institution, collection, metadata_stand
     record_data = {
         'collection_key': collection,
         'schema_key':metadata_standard,
-        'metadata': metadat_record
+        'metadata': metadat_record,
+        'terms_conditions_accepted':"True",
+        'data_agreement_accepted':"True",
+        'data_agreement_url':"https://www.environment.gov.za/",
+        'capture_method':"harvester"
     }
 
     headers = {
