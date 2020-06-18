@@ -81,7 +81,7 @@ class MIMSExcelImporter:
 
     def parse_file_identifier(self, record):
         if type(record['fileIdentifier']) == float:
-            record['fileIdentifier'] = str(int( record['fileIdentifier']))
+            record['fileIdentifier'] = str(int(record['fileIdentifier']))
 
     def parse_responsible_parties(self, record, field, append_mode=False):
         valid_keys = ['individualName','organizationName','positionName','contactInfo','role','email']
@@ -433,7 +433,8 @@ if __name__ == "__main__":
         for rec in converted_records:
             try:
                 print("Pushing record: {}".format(rec['fileIdentifier']))
-                metadata_publisher.add_a_record_to_ckan(rec,'dea','mims-historical','sans-1878-mims-historical-1')
+                #metadata_standard="{} {}".format(rec["metadataStandardName"],rec["metadataStandardVersion"])
+                metadata_publisher.add_a_record_to_ckan(rec,'deff','test','sans-1878-sadco-historical-1')
             except Exception as e:
                 print(e)
         print(len(converted_records))
