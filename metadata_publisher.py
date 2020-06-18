@@ -5,8 +5,11 @@ import time
 
 from requests.models import Response
 
-ckan_base_url = 'https://odp.saeon.dvn/api'
-odp_ckan_api_key = '6EsTdo8_bRZL8jMvC3cmGbNBaQCW6-4_IZTpQ5OPx3Y.QsX8UTRnpEWUnIWoe7j4jHpiHWyJ93N94PlK-doEzUY'
+#ckan_base_url = 'https://odp.saeon.dvn/api' #dev
+ckan_base_url = 'https://odp.saeon.stg/api' #staging
+
+#odp_ckan_api_key = '6EsTdo8_bRZL8jMvC3cmGbNBaQCW6-4_IZTpQ5OPx3Y.QsX8UTRnpEWUnIWoe7j4jHpiHWyJ93N94PlK-doEzUY' #dev
+odp_ckan_api_key = 'gNYaTHXqQx13D_G-TlWDr2sLtba_vX4aKDBqfX9iYmk.YxM5fNeQkhNb0KU_5nu7ThtTAiE1-o1s9N7eh6R0BWc' #staging
 method='POST'
 
 logging.basicConfig(level=logging.INFO)
