@@ -288,7 +288,7 @@ if __name__ == "__main__":
                     return datetime.strptime(str(date_input), fmt)
                 except ValueError:
                     pass
-            raise ValueError('no valid date format found')
+            raise ValueError('no valid date format found record {}'.format(record['fileIdentifier']))
 
         if type(record['date']) == str:
             date = convert_date(record['date'])
@@ -325,12 +325,38 @@ if __name__ == "__main__":
                                                    contactInfo, role_fixes[rparty['role'].lower()],
                                                    rparty['positionName'])#, online_resource)
 
-        schema_generator.set_geographic_identifier(record['geographicIdentifier'])
-        #print((record['boundingBox']))
-        schema_generator.set_bounding_box_extent(float(record['boundingBox']['westBoundLongitude']),
-                                                 float(record['boundingBox']['eastBoundLongitude']),
-                                                 float(record['boundingBox']['southBoundLatitude']),
-                                                 float(record['boundingBox']['northBoundLatitude']))
+        geo_identifier = record['geographicIdentifier']
+        if str(geo_identifier) == 'nan':
+            geo_identifier = ''
+        schema_generator.set_geographic_identifier(geo_identifier)
+
+        if record['boundingBox']:
+            northbnd = float(record['boundingBox']['northBoundLatitude'])
+            southbnd = float(record['boundingBox']['southBoundLatitude'])
+            eastbnd = float(record['boundingBox']['eastBoundLongitude'])
+            westbnd = float(record['boundingBox']['westBoundLongitude'])
+            if southbnd == northbnd:
+                if (southbnd and northbnd) > 0:
+                    northbnd = northbnd + 0.0001
+
+                elif (southbnd and northbnd) < 0:
+                    southbnd = southbnd - 0.0001
+                else:
+                    print("{} record's north & south latitude is the same".format(record['fileIdentifier']))
+
+            if eastbnd == westbnd:
+                if (eastbnd and westbnd) > 0:
+                    eastbnd = eastbnd + 0.0001
+
+                elif (eastbnd and westbnd) < 0:
+                    westbnd = westbnd - 0.0001
+
+                else:
+                    print("{} record's west & wast longitude is the same".format(record['fileIdentifier']))
+        else:
+            record['boundingBox'] = ''
+
+        schema_generator.set_bounding_box_extent(float(westbnd),float(eastbnd),float(southbnd),float(northbnd))
 
         start_time = record['startTime']
         end_time = record['endTime']
@@ -434,7 +460,7 @@ if __name__ == "__main__":
             try:
                 print("Pushing record: {}".format(rec['fileIdentifier']))
                 #metadata_standard="{} {}".format(rec["metadataStandardName"],rec["metadataStandardVersion"])
-                metadata_publisher.add_a_record_to_ckan(rec,'deff','test','sans-1878-sadco-historical-1')
+                metadata_publisher.add_a_record_to_ckan(rec,'deff','sadco','sans-1878-sadco-historical-1')
             except Exception as e:
                 print(e)
         print(len(converted_records))
