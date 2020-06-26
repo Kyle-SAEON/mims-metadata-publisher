@@ -8,8 +8,8 @@ from requests.models import Response
 #ckan_base_url = 'https://odp.saeon.dvn/api' #dev
 ckan_base_url = 'https://odp.saeon.stg/api' #staging
 
-#odp_ckan_api_key = '6EsTdo8_bRZL8jMvC3cmGbNBaQCW6-4_IZTpQ5OPx3Y.QsX8UTRnpEWUnIWoe7j4jHpiHWyJ93N94PlK-doEzUY' #dev
-odp_ckan_api_key = 'gNYaTHXqQx13D_G-TlWDr2sLtba_vX4aKDBqfX9iYmk.YxM5fNeQkhNb0KU_5nu7ThtTAiE1-o1s9N7eh6R0BWc' #staging
+#odp_ckan_api_key = 'dXw8d0UnNHbM7gARxMCvVl7cDifuzbKRDrz7QtDX-JY.3hjbqrWmfYgSbYOyMqOEZGlqTusW5jKCf-7oMvZd_ag' #dev
+odp_ckan_api_key = 'XfdVcl89665mjZx7fjVaXDJvvHiFsx5yZmy4ele6oGY.EzGB2zvgTgqSbqKOXzg1uBW1XlwOenZkS7-iKS74zqI' #staging
 method='POST'
 
 logging.basicConfig(level=logging.INFO)
@@ -23,17 +23,17 @@ UPDATE_METRICS = {
     'unpublished':0,
 }
 
-def add_a_record_to_ckan(metadat_record, institution, collection, metadata_standard):
+def add_a_record_to_ckan(metadata_record, institution, collection, metadata_standard):
     #url = "{}/metadata/".format(ckan_base_url)
 
     print("Trying to add record into {}".format(institution))
     record_data = {
         'collection_key': collection,
         'schema_key':metadata_standard,
-        'metadata': metadat_record,
+        'metadata': metadata_record,
         'terms_conditions_accepted':"True",
         'data_agreement_accepted':"True",
-        'data_agreement_url':"https://www.environment.gov.za/",
+        'data_agreement_url':"https://sadco.ocean.gov.za//",
         'capture_method':"harvester"
     }
 
@@ -44,20 +44,19 @@ def add_a_record_to_ckan(metadat_record, institution, collection, metadata_stand
     }
     url = ckan_base_url + f'/{institution}/metadata/'
     response = requests.post(url,json=record_data, headers=headers)
-
-    #print("{}\n{}\n{}".format(url, record_data,odp_ckan_api_key))
-
-    #print("Response on add record %r" %  (response.text))
-    if response.status_code == 200:
-        print("Added record {} successfuly".format(response['text']['id']))
-    else:
-        #print("Response on add record %r" %  (response['text']['id']))
-        #print(record_data)
-        raise RuntimeError('Request failed with return code: %s' % (
-            response.status_code))
     result = json.loads(response.text)
 
-    print("Response keys {}".format(result.keys()))
+    if response.status_code == 200:
+        print("Added record {} successfuly".format(result['pid']))
+    else:
+        print('Metadata ID: {}'.format(result['pid']))
+        print('Organization: {}'.format(result['institution_key']))
+        print('Metadata Collection: {}'.format(result['collection_key']))
+
+        #print(record_data)
+        #raise RuntimeError('Request failed with return code: %s' % (response.status_code))
+
+    #print("Response keys {}".format(result.keys()))
     #TODO: create error checks for check_ckan_added
     # if check_ckan_added(institution, result):
     #     msg = 'Added Successfully'
