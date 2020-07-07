@@ -199,6 +199,8 @@ class MIMSSchemaGenerator:
             "relatedIdentifierType": id_type,
             "relationType": relation_type
         }]
+    def set_sort_hierarchy(self,hierarchy):
+        self.record["hierarchy"] = hierarchy
 
     def get_filled_schema(self):
         return self.record

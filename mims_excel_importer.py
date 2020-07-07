@@ -81,7 +81,7 @@ class MIMSExcelImporter:
 
     def parse_file_identifier(self, record):
         if type(record['fileIdentifier']) == float:
-            record['fileIdentifier'] = str(int(record['fileIdentifier']))
+            record['fileIdentifier'] = str(int(record['fileIdentifier'].strip()))
 
     def parse_responsible_parties(self, record, field, append_mode=False):
         valid_keys = ['individualName','organizationName','positionName','contactInfo','role','email']
@@ -108,10 +108,10 @@ class MIMSExcelImporter:
                             detail[email_k] = email_v
                             detail[addr_k] = addr_v
                         else:
-                            parts = item.split(":")
+                            parts = item.split(":",1)
                             if len(parts) != 2:
                                 raise RecordParseError("bad field: %r" % item)
-                            k,v = item.split(":")
+                            k,v = item.split(":",1)
                             k = k.replace(" ","")
                             if k not in valid_keys:
                                 #print(k)
@@ -432,8 +432,8 @@ if __name__ == "__main__":
         rights_uri = record['rights']
         if str(rights_uri) == 'restricted':
             rights_uri = 'restricted'
-        schema_generator.set_constraints(record['rights'], rights_uri, record['accessConstraints'])
-
+        schema_generator.set_constraints(record['rights'], rights_uri, record['accessConstraints'].strip())
+        schema_generator.set_sort_hierarchy(record['hierarchy'])
 
 
         if record['relatedIdentifiers']:
@@ -460,7 +460,13 @@ if __name__ == "__main__":
             try:
                 print("Pushing record: {}".format(rec['fileIdentifier']))
                 #metadata_standard="{} {}".format(rec["metadataStandardName"],rec["metadataStandardVersion"])
-                metadata_publisher.add_a_record_to_ckan(rec,'deff','sadco','sans-1878-sadco-historical-1')
+                if rec['hierarchy'] == 'Child':
+                    metadata_publisher.add_a_record_to_ckan(rec, 'deff', 'mims-collection', 'sans-1878-mims-historical-1')
+                elif rec['hierarchy'] == 'Parent':
+                    metadata_publisher.add_a_record_to_ckan(rec, 'deff', 'mims-collection', 'sans-1878-mims-parent-records-1')
+                else:
+                    print('Metadata Standard note set')
+
             except Exception as e:
                 print(e)
         print(len(converted_records))

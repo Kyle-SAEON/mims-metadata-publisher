@@ -8,8 +8,8 @@ from requests.models import Response
 #ckan_base_url = 'https://odp.saeon.dvn/api' #dev
 ckan_base_url = 'https://odp.saeon.stg/api' #staging
 
-#odp_ckan_api_key = 'dXw8d0UnNHbM7gARxMCvVl7cDifuzbKRDrz7QtDX-JY.3hjbqrWmfYgSbYOyMqOEZGlqTusW5jKCf-7oMvZd_ag' #dev
-odp_ckan_api_key = 'XfdVcl89665mjZx7fjVaXDJvvHiFsx5yZmy4ele6oGY.EzGB2zvgTgqSbqKOXzg1uBW1XlwOenZkS7-iKS74zqI' #staging
+#odp_ckan_api_key = 'Roj8GL6UCwoNNgAkM2pceUSLFVXSMq38pgnahxthD-s.uP1kUSkwGIcBJ9DKv7ztmKiGDgOWB3SkThmmJBGHSUM' #dev
+odp_ckan_api_key = '0s5vmAmk9QNOi1Q5mYAseLGGrhTQxbVzQsPIair6NfU.h1Z72joBMO_XIPJxPA1BkCge66e7xXaTbiqaUlQ-MUg' #staging
 method='POST'
 
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +25,7 @@ UPDATE_METRICS = {
 
 def add_a_record_to_ckan(metadata_record, institution, collection, metadata_standard):
     #url = "{}/metadata/".format(ckan_base_url)
-
+    metadata_record.pop("hierarchy")
     print("Trying to add record into {}".format(institution))
     record_data = {
         'collection_key': collection,
@@ -33,7 +33,7 @@ def add_a_record_to_ckan(metadata_record, institution, collection, metadata_stan
         'metadata': metadata_record,
         'terms_conditions_accepted':"True",
         'data_agreement_accepted':"True",
-        'data_agreement_url':"https://sadco.ocean.gov.za//",
+        'data_agreement_url':"https://www.environment.gov.za/branches/oceans_coast",
         'capture_method':"harvester"
     }
 
