@@ -5,9 +5,8 @@ import sys
 import traceback
 import mims_schema_generator
 import metadata_publisher
-from pprint import pprint
-from odp.client import ODPClient
-from odp.exceptions import ODPException
+import pprint
+import json
 
 #mims_sheet_file='./mims.spreadsheet.schema.mappings.2019.12.5.xlsx'#'./MIMS.Metadata.Master.Sheet.xlsx'
 
@@ -434,7 +433,7 @@ if __name__ == "__main__":
         if str(rights_uri) == 'restricted':
             rights_uri = 'restricted'
         schema_generator.set_constraints(record['rights'], rights_uri, record['accessConstraints'].strip())
-        #schema_generator.set_sort_hierarchy(record['hierarchy'])
+        schema_generator.set_sort_hierarchy(record['hierarchy'])
 
 
         if record['relatedIdentifiers']:
@@ -457,13 +456,19 @@ if __name__ == "__main__":
 
     if args.publish:
         print("Attempting to push records")
-        client = ODPClient()
         for rec in converted_records:
             try:
                 print("Pushing record: {}".format(rec['fileIdentifier']))
-                result = client.create_or_update_metadata_record('chief-directorate-oceans-and-coastal-research','marine-information-management-system-collection','sans-1878-mims-historical-1',rec, capture_method='harvester', data_agreement_url='https://www.environment.gov.za/branches/oceans_coast',data_agreement_accepted='True',terms_conditions_accepted='True')
-            except ODPException as e:
-                print(f"{e}: {e.error_detail}")
+                #metadata_standard="{} {}".format(rec["metadataStandardName"],rec["metadataStandardVersion"])
+                if rec['hierarchy'] == 'Child':
+                    metadata_publisher.add_a_record_to_ckan(rec, 'deff', 'mims-collection', 'sans-1878-mims-historical-1')
+                elif rec['hierarchy'] == 'Parent':
+                    metadata_publisher.add_a_record_to_ckan(rec, 'deff', 'mims-collection', 'sans-1878-mims-parent-records-1')
+                else:
+                    print('Metadata Standard note set')
+
+            except Exception as e:
+                print(e)
         print(len(converted_records))
 
     if args.state:
