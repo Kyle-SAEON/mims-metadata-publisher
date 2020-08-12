@@ -5,11 +5,11 @@ import time
 
 from requests.models import Response
 
-#ckan_base_url = 'https://odp.saeon.dvn/api' #dev
-ckan_base_url = 'https://odp.saeon.stg/api' #staging
+ckan_base_url = 'https://odp.saeon.dvn/api' #dev
+#ckan_base_url = 'https://odp.saeon.stg/api' #staging
 
-#odp_ckan_api_key = 'Roj8GL6UCwoNNgAkM2pceUSLFVXSMq38pgnahxthD-s.uP1kUSkwGIcBJ9DKv7ztmKiGDgOWB3SkThmmJBGHSUM' #dev
-odp_ckan_api_key = '0s5vmAmk9QNOi1Q5mYAseLGGrhTQxbVzQsPIair6NfU.h1Z72joBMO_XIPJxPA1BkCge66e7xXaTbiqaUlQ-MUg' #staging
+#odp_ckan_api_key 
+#odp_ckan_api_key
 method='POST'
 
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +25,7 @@ UPDATE_METRICS = {
 
 def add_a_record_to_ckan(metadata_record, institution, collection, metadata_standard):
     #url = "{}/metadata/".format(ckan_base_url)
-    metadata_record.pop("hierarchy")
+    #metadata_record.pop("hierarchy")
     print("Trying to add record into {}".format(institution))
     record_data = {
         'collection_key': collection,
