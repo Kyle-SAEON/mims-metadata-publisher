@@ -8,7 +8,7 @@ from requests.models import Response
 ckan_base_url = 'https://odp.saeon.dvn/api' #dev
 #ckan_base_url = 'https://odp.saeon.stg/api' #staging
 
-#odp_ckan_api_key 
+#odp_ckan_api_key
 #odp_ckan_api_key
 method='POST'
 
