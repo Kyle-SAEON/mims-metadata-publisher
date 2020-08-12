@@ -1,5 +1,8 @@
 venv/
-mims.spreadsheet.schema.mappings.2019.12.5.xlsx
-UTR_metadata_mims_view_testing.xlsx
-AMS_test_metadata.xlsx
-datetime
+excel_sheets/
+.env
+data.json
+data.txt
+datacite_example_record.json
+.idea/
+__pycache__/
