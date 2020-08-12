@@ -8,8 +8,6 @@ from requests.models import Response
 ckan_base_url = 'https://odp.saeon.dvn/api' #dev
 #ckan_base_url = 'https://odp.saeon.stg/api' #staging
 
-#odp_ckan_api_key
-#odp_ckan_api_key
 method='POST'
 
 logging.basicConfig(level=logging.INFO)
@@ -40,7 +38,6 @@ def add_a_record_to_ckan(metadata_record, institution, collection, metadata_stan
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + odp_ckan_api_key,
     }
     url = ckan_base_url + f'/{institution}/metadata/'
     response = requests.post(url,json=record_data, headers=headers)
@@ -137,7 +134,6 @@ def check_ckan_added(institution, result):
     try:
         response = requests.get(
             url=url,
-            headers={'Authorization': 'Bearer ' + odp_ckan_api_key},
             verify=False
         )
     except Exception as e:
@@ -160,7 +156,6 @@ def set_workflow_state(record,institution,state):
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + odp_ckan_api_key,
     }
     # url='http://odpapi-migration.saeon.dvn/dea/metadata/workflow/b67bf8cb-55c3-426b-ac33-82ea3be62bd8?state=Published'
     url = ckan_base_url + f"/{institution}/metadata/workflow/{record['fileIdentifier']}?state={state}"
